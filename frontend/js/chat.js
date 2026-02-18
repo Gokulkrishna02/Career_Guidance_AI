@@ -38,7 +38,7 @@ sendBtn.onclick = async () => {
     );
     const data = await res.json();
     typing.remove();
-    addMessage(data.reply || "No response", "assistant");
+    addMessage(data.reply || data.error || "No response", "assistant");
   } catch (e) {
     typing.remove();
     addMessage("Server error", "assistant");

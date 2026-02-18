@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Setup | Career AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Complete Your Profile</h2>
+        <div class="grid">
+            <div class="form-group">
+                <label>Education Level</label>
+                <select id="education_level">
+                    <option value="School">School</option>
+                    <option value="College">College</option>
+                    <option value="Graduate">Graduate</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Class or Degree</label>
+                <input type="text" id="class_or_degree" placeholder="e.g. 12th Std, B.E">
+            </div>
+            <div class="form-group">
+                <label>Stream</label>
+                <input type="text" id="stream" placeholder="e.g. Science, CSE">
+            </div>
+            <div class="form-group">
+                <label>Current Marks (%)</label>
+                <input type="number" id="marks" step="0.01" placeholder="e.g. 85.5">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="category">
+                    <option value="General">General</option>
+                    <option value="OBC">OBC</option>
+                    <option value="SC">SC</option>
+                    <option value="ST">ST</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Interest Area</label>
+                <input type="text" id="interest_area" placeholder="e.g. Artificial Intelligence">
+            </div>
+            <div class="form-group full-width">
+                <label>Location Preference</label>
+                <input type="text" id="location_preference" placeholder="e.g. Tamil Nadu, Bangalore">
+            </div>
+            <div class="form-group full-width">
+                <label>Career Goal</label>
+                <textarea id="career_goal" rows="3" placeholder="Describe what you want to achieve..."></textarea>
+            </div>
+        </div>
+        <button class="btn" onclick="saveProfile()">Finish Setup</button>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const userId = localStorage.getItem("user_id");
+        if (!userId) window.location.href = "login.html";
+
+        async function saveProfile() {
+            const data = {
+                education_level: document.getElementById('education_level').value,
+                class_or_degree: document.getElementById('class_or_degree').value,
+                stream: document.getElementById('stream').value,
+                marks: parseFloat(document.getElementById('marks').value),
+                category: document.getElementById('category').value,
+                interest_area: document.getElementById('interest_area').value,
+                location_preference: document.getElementById('location_preference').value,
+                career_goal: document.getElementById('career_goal').value
+            };
+
+            const res = await api(`/profile/setup/${userId}`, "POST", data);
+            if (res.message) {
+                alert("Profile setup completed!");
+                window.location.href = "index.html";
+            } else {
+                alert(res.error || "Failed to save profile");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

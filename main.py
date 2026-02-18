@@ -361,6 +361,8 @@ async def chat_with_ai(session_id: int, message: str):
     try:
         # 1. Get session → user
         user_id = get_user_id_by_session(db, session_id)
+        if user_id is None:
+            return {"error": "Session not found. Please start a new chat."}
 
         # 2. Fetch profile
         profile = get_profile_by_user_id(db, user_id)

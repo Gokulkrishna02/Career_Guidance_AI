@@ -250,7 +250,8 @@ def get_user_id_by_session(db, session_id):
         FROM chat_sessions
         WHERE session_id = :session_id
     """)
-    return db.execute(query, {"session_id": session_id}).fetchone()[0]
+    result = db.execute(query, {"session_id": session_id}).fetchone()
+    return result[0] if result else None
 
 
 # =====================================================

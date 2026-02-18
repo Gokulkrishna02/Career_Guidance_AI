@@ -1,0 +1,35 @@
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.user {
+  background: #2563eb;
+  color: white;
+  margin-left: auto;
+}
+
+.assistant {
+  background: #e5e7eb;
+}

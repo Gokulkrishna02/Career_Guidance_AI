@@ -1,0 +1,3 @@
+function createNewChat() {
+  chatBox.innerHTML = "";
+}

@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px;
+  background: #020617;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h1 {
+  margin: 0 0 20px;
+  font-size: 22px;
+}
+
+.new-chat {
+  background: #2563eb;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chat-list {
+  margin-top: 20px;
+  flex: 1;
+}
+
+.chat-item {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: #94a3b8;
+}
+
+.chat-item.active,
+.chat-item:hover {
+  background: #1e293b;
+  color: white;
+}
+
+/* PROFILE */
+.profile {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+  cursor: pointer;
+}
+
+.profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* CHAT */
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0f172a;
+}
+
+.chat-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logout {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #e5e7eb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* MESSAGES */
+.messages {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.message {
+  padding: 14px 18px;
+  border-radius: 12px;
+  line-height: 1.6;
+  width: fit-content;
+  max-width: 80%;
+}
+
+.message.assistant {
+  background: #1e293b;
+}
+
+.message.user {
+  background: #2563eb;
+  margin-left: auto;
+}
+
+/* INPUT */
+.input-bar {
+  padding: 16px;
+  border-top: 1px solid #334155;
+  display: flex;
+  gap: 12px;
+}
+
+.input-bar input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: #020617;
+  color: white;
+}
+
+.input-bar button {
+  background: #2563eb;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Career AI</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h1>Career AI</h1>
+    <button id="newChat">+ New Chat</button>
+    <div class="profile">Student</div>
+  </aside>
+
+  <!-- CHAT -->
+  <main class="chat">
+    <header class="chat-header">
+      <h2>AI Career Counselor</h2>
+      <button id="logout">Logout</button>
+    </header>
+
+    <div id="messages" class="messages">
+      <div class="message assistant">
+        Hello! I can help you choose courses, colleges, and skills.
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <input id="messageInput" placeholder="Ask about your career..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </main>
+
+</div>
+
+<script src="js/chat.js"></script>
+</body>
+</html>

@@ -141,7 +141,15 @@
             </div>
             <div class="form-group full-width">
                 <label>Career Goal</label>
-                <textarea id="career_goal" rows="3" placeholder="Describe what you want to achieve..."></textarea>
+                <textarea id="career_goal" rows="2" placeholder="Describe what you want to achieve..."></textarea>
+            </div>
+            <div class="form-group full-width">
+                <label>Current Skills (comma-separated)</label>
+                <input type="text" id="skills" placeholder="e.g. Python, Public Speaking, Maths">
+            </div>
+            <div class="form-group">
+                <label>Max Annual Budget (LPA)</label>
+                <input type="number" id="budget_lpa" step="0.1" placeholder="e.g. 5.0">
             </div>
         </div>
         <button class="btn" onclick="saveProfile()">Finish Setup</button>
@@ -161,7 +169,9 @@
                 category: document.getElementById('category').value,
                 interest_area: document.getElementById('interest_area').value,
                 location_preference: document.getElementById('location_preference').value,
-                career_goal: document.getElementById('career_goal').value
+                career_goal: document.getElementById('career_goal').value,
+                budget_lpa: parseFloat(document.getElementById('budget_lpa').value) || 0,
+                skills: document.getElementById('skills').value
             };
 
             const res = await api(`/profile/setup/${userId}`, "POST", data);

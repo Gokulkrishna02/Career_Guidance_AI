@@ -220,6 +220,7 @@
         style="width: 100%; border: none; background: rgba(99, 102, 241, 0.2); color: white; margin-bottom: 20px;"
         onclick="createNewChat()">+ New Chat</button>
       <div class="nav-item" onclick="switchView('recommendations')">🎓 Recommendations</div>
+      <div class="nav-item" onclick="switchView('insights')">📈 Career Insights</div>
       <div class="nav-item" onclick="switchView('profile')">👤 My Profile</div>
     </div>
     <div class="profile-section">
@@ -271,6 +272,41 @@
       </div>
     </div>
 
+    <!-- Insights View -->
+    <div id="insightsView" class="view">
+      <div style="display: flex; gap: 24px;">
+        <!-- Career Ranking -->
+        <div style="flex: 1;">
+          <h2>Top Career Matches</h2>
+          <div id="rankingGrid" class="rec-grid" style="grid-template-columns: 1fr;">
+            <p>Loading rankings...</p>
+          </div>
+        </div>
+
+        <!-- Skill Gap -->
+        <div style="flex: 1;">
+          <h2>Skill Gap Analysis</h2>
+          <div id="skillGapBox" class="rec-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
+            <h3>Missing Skills for Your Goal</h3>
+            <ul id="skillGapList" style="padding-left: 20px; line-height: 2;">
+              <li>Loading analysis...</li>
+            </ul>
+          </div>
+
+          <div class="rec-card" style="margin-top: 24px;">
+            <h3>Web Data Explorer</h3>
+            <p style="font-size: 0.8rem; margin-bottom: 12px;">Search for careers not in our database.</p>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="webSearchInput" placeholder="e.g. Prompt Engineer"
+                style="padding: 10px; flex: 1; background: #020617; border: 1px solid #334155; color: white;">
+              <button class="send-btn" onclick="performWebSearch()" style="padding: 10px 15px;">Search</button>
+            </div>
+            <div id="webSearchResult" style="margin-top: 15px; font-size: 0.9rem; color: #cbd5e1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Profile View -->
     <div id="profileView" class="view">
       <h2>Your Profile</h2>
@@ -311,6 +347,10 @@
         document.getElementById('recView').classList.add('active');
         event.currentTarget.classList.add('active');
         loadRecommendations();
+      } else if (view === 'insights') {
+        document.getElementById('insightsView').classList.add('active');
+        event.currentTarget.classList.add('active');
+        loadInsights();
       } else if (view === 'profile') {
         document.getElementById('profileView').classList.add('active');
         event.currentTarget.classList.add('active');
@@ -390,6 +430,52 @@
         content.textContent = res.error;
       } else {
         content.textContent = res.ai_guidance;
+      }
+    }
+
+    async function loadInsights() {
+      // 1. Load Rankings
+      const rankGrid = document.getElementById('rankingGrid');
+      const rankRes = await api(`/career-ranking/${userId}`);
+      if (rankRes.rankings) {
+        rankGrid.innerHTML = rankRes.rankings.map(c => `
+          <div class="rec-card">
+            <h3>${c.name}</h3>
+            <p>Match Score: <span class="highlight">${c.score}%</span></p>
+            <p>Demand: ${c.demand} | Growth: ${c.growth}</p>
+          </div>
+        `).join('');
+      }
+
+      // 2. Load Skill Gap
+      const gapList = document.getElementById('skillGapList');
+      const gapRes = await api(`/skill-gap/${userId}`);
+      if (gapRes.missing_skills) {
+        gapList.innerHTML = gapRes.missing_skills.length > 0
+          ? gapRes.missing_skills.map(s => `<li>${s.skill} <small>(Priority: ${s.importance})</small></li>`).join('')
+          : "<li>You have all the required skills for this role! 🎉</li>";
+      } else {
+        gapList.innerHTML = `<li>${gapRes.error || "Could not analyze gap"}</li>`;
+      }
+    }
+
+    async function performWebSearch() {
+      const q = document.getElementById('webSearchInput').value;
+      const resultDiv = document.getElementById('webSearchResult');
+      if (!q) return;
+
+      resultDiv.innerHTML = "Searching the web...";
+      const res = await api(`/web-search?query=${encodeURIComponent(q)}`);
+
+      if (res.error) {
+        resultDiv.innerHTML = "Search failed.";
+      } else {
+        resultDiv.innerHTML = `
+          <strong>${res.title}</strong><br>
+          ${res.description}<br><br>
+          💰 Salary: ${res.avg_salary}<br>
+          🛠 Skills: ${res.skills_required.join(", ")}
+        `;
       }
     }
 

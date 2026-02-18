@@ -321,3 +321,93 @@ def save_chat(db, session_id, role, message):
         "message": message
     })
 
+# =====================================================
+# SKILLS / GAP ANALYSIS
+# =====================================================
+
+def get_student_skills(db, user_id):
+    query = text("""
+        SELECT s.skill_id, s.skill_name
+        FROM student_skills ss
+        JOIN skills s ON ss.skill_id = s.skill_id
+        WHERE ss.user_id = :user_id
+    """)
+    return db.execute(query, {"user_id": user_id}).fetchall()
+
+def add_student_skill(db, user_id, skill_id):
+    query = text("""
+        INSERT INTO student_skills (user_id, skill_id)
+        VALUES (:user_id, :skill_id)
+        ON CONFLICT DO NOTHING
+    """)
+    db.execute(query, {"user_id": user_id, "skill_id": skill_id})
+
+def get_skill_gap(db, user_id, career_name):
+    query_req = text("""
+        SELECT s.skill_name, cs.importance_level
+        FROM career_skills cs
+        JOIN skills s ON cs.skill_id = s.skill_id
+        JOIN careers c ON cs.career_id = c.career_id
+        WHERE c.career_name = :career_name
+    """)
+    required_skills = db.execute(query_req, {"career_name": career_name}).fetchall()
+
+    query_user = text("""
+        SELECT s.skill_name
+        FROM student_skills ss
+        JOIN skills s ON ss.skill_id = s.skill_id
+        WHERE ss.user_id = :user_id
+    """)
+    user_skills = {row[0] for row in db.execute(query_user, {"user_id": user_id}).fetchall()}
+
+    gap = []
+    for skill, importance in required_skills:
+        if skill not in user_skills:
+            gap.append({"skill": skill, "importance": importance})
+    
+    return sorted(gap, key=lambda x: x["importance"], reverse=True)
+
+def get_skill_id_by_name(db, skill_name):
+    query = text("SELECT skill_id FROM skills WHERE skill_name = :name")
+    result = db.execute(query, {"name": skill_name}).fetchone()
+    return result[0] if result else None
+
+def create_skill(db, skill_name):
+    query = text("INSERT INTO skills (skill_name) VALUES (:name) RETURNING skill_id")
+    return db.execute(query, {"name": skill_name}).fetchone()[0]
+
+def get_ranked_careers(db, user_id):
+    # Fetch interest and goal
+    profile = get_profile_by_user_id(db, user_id)
+    if not profile: return []
+    
+    interest = profile["interest_area"].lower()
+    
+    # Simple scoring: Base Score (Demand + Growth) + Fit (Interest match)
+    query = text("""
+        SELECT 
+            career_name, 
+            demand_score, 
+            growth_score,
+            CASE 
+                WHEN LOWER(career_name) LIKE :interest THEN 30
+                ELSE 0
+            END as fit_score
+        FROM careers
+        ORDER BY (demand_score + growth_score + 
+            CASE WHEN LOWER(career_name) LIKE :interest THEN 30 ELSE 0 END) DESC
+        LIMIT 5
+    """)
+    
+    rows = db.execute(query, {"interest": f"%{interest}%"}).fetchall()
+    return [
+        {
+            "name": row[0],
+            "score": row[1] + row[2] + row[3],
+            "demand": row[1],
+            "growth": row[2]
+        } for row in rows
+    ]
+
+
+

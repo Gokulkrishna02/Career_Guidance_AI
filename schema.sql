@@ -105,3 +105,10 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     message TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 13. Student Skills (to track current knowledge)
+CREATE TABLE IF NOT EXISTS student_skills (
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    skill_id INTEGER REFERENCES skills(skill_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, skill_id)
+);

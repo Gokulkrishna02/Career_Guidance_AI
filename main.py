@@ -43,6 +43,8 @@ class ProfileSetupRequest(BaseModel):
     interest_area: str
     location_preference: str
     career_goal: str
+    budget_lpa: float | None = None
+    skills: str | None = None  # Comma separated skills
 
 # ---------------- ADMIN ----------------
 
@@ -106,15 +108,66 @@ def login_user(data: LoginRequest):
 def setup_profile(user_id: int, profile: ProfileSetupRequest):
     db = SessionLocal()
     try:
-        create_student_profile(db, user_id, profile.dict())
+        profile_data = profile.dict()
+        skills_str = profile_data.pop("skills", "")
+        
+        create_student_profile(db, user_id, profile_data)
+        
+        # Handle skills
+        if skills_str:
+            for s_name in [s.strip() for s in skills_str.split(",")]:
+                skill_id = get_skill_id_by_name(db, s_name)
+                if not skill_id:
+                    skill_id = create_skill(db, s_name)
+                add_student_skill(db, user_id, skill_id)
+
         db.commit()
-
-        # IMPORTANT: update RAG
         build_and_save_index()
-
         return {"message": "Profile setup completed"}
     finally:
         db.close()
+
+# ---------------- SKILL GAP ----------------
+
+@app.get("/skill-gap/{user_id}")
+def skill_gap_analysis(user_id: int, career_name: str | None = None):
+    db = SessionLocal()
+    try:
+        if not career_name:
+            profile = get_profile_by_user_id(db, user_id)
+            career_name = profile.get("career_goal") if profile else None
+        
+        if not career_name:
+            return {"error": "Target career unknown"}
+
+        gap = get_skill_gap(db, user_id, career_name)
+        return {
+            "career": career_name,
+            "missing_skills": gap
+        }
+    finally:
+        db.close()
+
+# ---------------- CAREER RANKING ----------------
+
+@app.get("/career-ranking/{user_id}")
+def career_ranking(user_id: int):
+    db = SessionLocal()
+    try:
+        rankings = get_ranked_careers(db, user_id)
+        return {"rankings": rankings}
+    finally:
+        db.close()
+
+# ---------------- WEB SEARCH (FALLBACK) ----------------
+
+from scraper.collector import CareerScraper
+scraper = CareerScraper()
+
+@app.get("/web-search")
+def web_search(query: str):
+    info = scraper.search_career_info(query)
+    return info
 
 @app.get("/profile/{user_id}")
 def get_profile(user_id: int):
@@ -152,6 +205,7 @@ def personalized_recommendation(user_id: int, year: int = 2024):
         marks = profile["marks"]
         category = profile["category"]
         interest_area = profile["interest_area"]
+        budget = profile.get("budget_lpa")
 
         course_id = get_course_id_by_name(db, interest_area)
         if not course_id:
@@ -165,19 +219,28 @@ def personalized_recommendation(user_id: int, year: int = 2024):
             year=year
         )
 
+        recs = []
+        for row in colleges:
+            # Simulated constraint check
+            status = "Within Budget"
+            if budget and budget > 0:
+                # Assuming simple check for demo
+                if row[2] < (budget / 4): status = "High Value"
+                elif row[2] > budget: status = "Expensive"
+
+            recs.append({
+                "college": row[0],
+                "cutoff": row[1],
+                "avg_package_lpa": row[2],
+                "placement_percentage": row[3],
+                "status": status
+            })
+
         return {
             "user_id": user_id,
             "interest": interest_area,
             "marks": marks,
-            "recommendations": [
-                {
-                    "college": row[0],
-                    "cutoff": row[1],
-                    "avg_package_lpa": row[2],
-                    "placement_percentage": row[3]
-                }
-                for row in colleges
-            ]
+            "recommendations": recs
         }
     finally:
         db.close()

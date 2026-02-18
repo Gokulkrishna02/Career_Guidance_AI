@@ -12,6 +12,14 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def build_and_save_index():
     documents = build_documents_from_db()
+    
+    if not documents:
+        # Provide fallback documents to prevent crash if DB is empty
+        documents = [
+            "Career guidance system is ready. Please add college and placement data to the database to enable personalized discovery.",
+            "Students can explore various engineering and arts courses through this AI counselor."
+        ]
+
     embeddings = model.encode(documents)
 
     index = faiss.IndexFlatL2(embeddings.shape[1])

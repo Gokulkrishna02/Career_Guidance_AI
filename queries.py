@@ -40,6 +40,16 @@ def create_student_profile(db, user_id, profile):
         VALUES
         (:user_id, :education_level, :class_or_degree, :stream,
          :marks, :category, :interest_area, :location_preference, :career_goal)
+        ON CONFLICT (user_id) DO UPDATE SET
+            education_level = EXCLUDED.education_level,
+            class_or_degree = EXCLUDED.class_or_degree,
+            stream = EXCLUDED.stream,
+            marks = EXCLUDED.marks,
+            category = EXCLUDED.category,
+            interest_area = EXCLUDED.interest_area,
+            location_preference = EXCLUDED.location_preference,
+            career_goal = EXCLUDED.career_goal,
+            updated_at = CURRENT_TIMESTAMP
     """)
     db.execute(query, {
         "user_id": user_id,

@@ -9,7 +9,9 @@ from auth_utils import hash_password, verify_password
 from rag.rag_index import build_and_save_index, cached_rag_search
 from ml.career_scorer import score_careers
 from datetime import datetime
+from sqlalchemy import text
 import ollama
+import json
 
 # ---------------- APP ----------------
 app = FastAPI(title="Career Guidance AI Backend", version="2.0.0")
@@ -601,7 +603,8 @@ async def chat_with_ai(session_id: int, message: str):
         # -------------------------
 
         # 1. Fetch history for context
-        history = get_chat_history(db, session_id, limit=5)
+        raw_history = get_recent_chats(db, session_id, limit=5)
+        history = [{"role": row[0], "message": row[1]} for row in raw_history]
         
         # 2. Get user info for grounding
         user_id_row = db.execute(text("SELECT user_id FROM chat_sessions WHERE session_id = :s"), {"s": session_id}).fetchone()
@@ -636,8 +639,8 @@ If you don't know the answer, say you are searching for more details.
         )
         
         reply = response["message"]["content"]
-        save_chat_message(db, session_id, "user", message)
-        save_chat_message(db, session_id, "assistant", reply)
+        save_chat(db, session_id, "user", message)
+        save_chat(db, session_id, "assistant", reply)
         db.commit()
 
         return {"reply": reply}

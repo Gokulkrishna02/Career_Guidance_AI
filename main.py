@@ -59,6 +59,10 @@ class SkillProgressRequest(BaseModel):
 class AddSkillRequest(BaseModel):
     skill_name: str
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    new_password: str
+
 # ---------------- ADMIN ----------------
 
 @app.post("/admin/rebuild-vector-db")
@@ -124,6 +128,24 @@ def login_user(data: LoginRequest):
             "user_id": user_id,
             "name": name
         }
+    finally:
+        db.close()
+
+@app.post("/auth/forgot-password")
+def forgot_password(data: ForgotPasswordRequest):
+    db = SessionLocal()
+    try:
+        user = get_user_by_email(db, data.email)
+        if not user:
+            return {"error": "Email not found"}
+        
+        password_hash = hash_password(data.new_password)
+        update_password(db, data.email, password_hash)
+        db.commit()
+        return {"message": "Password updated successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"Failed to update password: {str(e)}"}
     finally:
         db.close()
 

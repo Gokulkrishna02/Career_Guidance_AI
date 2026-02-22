@@ -34,6 +34,15 @@ def get_user_name(db, user_id):
     return result[0] if result else "Student"
 
 
+def update_password(db, email, password_hash):
+    query = text("""
+        UPDATE users
+        SET password_hash = :password_hash
+        WHERE email = :email
+    """)
+    db.execute(query, {"email": email, "password_hash": password_hash})
+
+
 # =====================================================
 # STUDENT PROFILE
 # =====================================================

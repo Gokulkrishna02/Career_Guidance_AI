@@ -302,7 +302,11 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="loginPassword">Password</label>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <label for="loginPassword">Password</label>
+          <a href="#" onclick="showForgot(true)"
+            style="font-size: 0.75rem; color: var(--accent); text-decoration: none;">Forgot?</a>
+        </div>
         <div class="input-wrapper">
           <span class="icon">🔒</span>
           <input id="loginPassword" class="input-field" type="password" placeholder="••••••••" required
@@ -311,6 +315,30 @@
         </div>
       </div>
       <button type="submit" id="loginBtn" class="btn-primary submit-btn">Sign In →</button>
+    </form>
+
+    <!-- Forgot Password Form (Hidden) -->
+    <form id="forgotForm" class="auth-form hidden" onsubmit="handleForgot(event)">
+      <div class="brand" style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.2rem;">Reset Password</h2>
+        <p>Enter your email and new password</p>
+      </div>
+      <div class="form-group">
+        <label for="forgotEmail">Email Address</label>
+        <input id="forgotEmail" class="input-field" type="email" placeholder="name@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="forgotNewPassword">New Password</label>
+        <div class="input-wrapper">
+          <span class="icon">🔒</span>
+          <input id="forgotNewPassword" class="input-field" type="password" placeholder="Min 6 characters" required
+            minlength="6">
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn-secondary" style="flex: 1;" onclick="showForgot(false)">Cancel</button>
+        <button type="submit" id="forgotBtn" class="btn-primary" style="flex: 2;">Reset Password</button>
+      </div>
     </form>
 
     <!-- Register Form -->
@@ -359,8 +387,16 @@
       const isLogin = tab === "login";
       document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
       document.getElementById("registerForm").classList.toggle("hidden", isLogin);
+      document.getElementById("forgotForm").classList.add("hidden");
       document.getElementById("tabLogin").classList.toggle("active", isLogin);
       document.getElementById("tabRegister").classList.toggle("active", !isLogin);
+      clearError();
+    }
+
+    function showForgot(show) {
+      document.getElementById("loginForm").classList.toggle("hidden", show);
+      document.getElementById("forgotForm").classList.toggle("hidden", !show);
+      document.querySelector(".auth-tabs").style.display = show ? "none" : "flex";
       clearError();
     }
 
@@ -369,12 +405,25 @@
       el.textContent = "⚠️ " + msg;
       el.classList.add("show");
     }
+    function showSuccess(msg) {
+      const el = document.getElementById("errorMsg");
+      el.textContent = "✅ " + msg;
+      el.style.color = "#4ade80";
+      el.style.background = "rgba(74, 222, 128, 0.08)";
+      el.style.borderColor = "rgba(74, 222, 128, 0.2)";
+      el.classList.add("show");
+    }
     function clearError() {
-      document.getElementById("errorMsg").classList.remove("show");
+      const el = document.getElementById("errorMsg");
+      el.classList.remove("show");
+      el.style.color = "";
+      el.style.background = "";
+      el.style.borderColor = "";
     }
 
     function setLoading(btnId, loading, defaultText) {
       const btn = document.getElementById(btnId);
+      if (!btn) return;
       btn.disabled = loading;
       btn.textContent = loading ? "Please wait..." : defaultText;
     }
@@ -427,6 +476,9 @@
 
       setLoading("registerBtn", true, "Create Account →");
       try {
+        // Clear old sessions
+        localStorage.clear();
+
         const res = await api("/auth/register", "POST", {
           name, email, password,
           date_of_birth: dob || null,
@@ -443,6 +495,28 @@
         showError("Cannot reach server. Make sure the backend is running.");
       } finally {
         setLoading("registerBtn", false, "Create Account →");
+      }
+    }
+
+    async function handleForgot(e) {
+      e.preventDefault();
+      clearError();
+      const email = document.getElementById("forgotEmail").value.trim();
+      const new_password = document.getElementById("forgotNewPassword").value;
+
+      setLoading("forgotBtn", true, "Reset Password");
+      try {
+        const res = await api("/auth/forgot-password", "POST", { email, new_password });
+        if (res.message) {
+          showSuccess("Password reset successful! You can now sign in.");
+          setTimeout(() => showForgot(false), 2000);
+        } else {
+          showError(res.error || "Failed to reset password.");
+        }
+      } catch (err) {
+        showError("Cannot reach server.");
+      } finally {
+        setLoading("forgotBtn", false, "Reset Password");
       }
     }
   </script>

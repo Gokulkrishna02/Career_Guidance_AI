@@ -1,7 +1,5 @@
 import hashlib
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+import bcrypt
 
 def _normalize_password(password: str) -> str:
     """
@@ -12,8 +10,13 @@ def _normalize_password(password: str) -> str:
 
 def hash_password(password: str) -> str:
     normalized = _normalize_password(password)
-    return pwd_context.hash(normalized)
+    # bcrypt.hashpw returns bytes, so we decode it for storage
+    return bcrypt.hashpw(normalized.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 def verify_password(password: str, hashed: str) -> bool:
     normalized = _normalize_password(password)
-    return pwd_context.verify(normalized, hashed)
+    try:
+        # bcrypt.checkpw expects both arguments as bytes
+        return bcrypt.checkpw(normalized.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False

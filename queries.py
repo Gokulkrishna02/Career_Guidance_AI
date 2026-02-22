@@ -383,7 +383,7 @@ def insert_scraped_career(db: Session, data: dict):
         return career_id
     except Exception as e:
         db.rollback()
-        print(f"❌ Error inserting scraped career: {e}")
+        print(f"Error inserting scraped career: {e}")
         traceback.print_exc()
         return None
 

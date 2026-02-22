@@ -5,7 +5,7 @@ from scraper.collector import CareerScraper
 def test_persistence():
     db = SessionLocal()
     scraper = CareerScraper()
-    query = "Quantum Computing Researcher"
+    query = "Bio-Robotics Surgeon"
     print(f"Testing persistence for: {query}")
     data = scraper.search_career_info(query)
     print(f"Scraper data: {data}")
@@ -15,8 +15,11 @@ def test_persistence():
     
     # Verify
     from sqlalchemy import text
-    res = db.execute(text("SELECT career_name FROM careers WHERE career_id = :cid"), {"cid": cid}).fetchone()
-    print(f"Verified from DB: {res}")
+    if cid:
+        res = db.execute(text("SELECT career_name, avg_salary_lpa FROM careers WHERE career_id = :cid"), {"cid": cid}).fetchone()
+        print(f"Verified from DB: {res}")
+    else:
+        print("ERROR: cid is None, insertion failed.")
     db.close()
 
 if __name__ == "__main__":

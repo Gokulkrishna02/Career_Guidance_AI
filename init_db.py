@@ -8,10 +8,10 @@ load_dotenv()
 def init_db():
     schema_path = os.path.join(os.getcwd(), "schema.sql")
     if not os.path.exists(schema_path):
-        print("❌ schema.sql not found")
+        print("ERROR: schema.sql not found")
         return
 
-    print("📖 Reading schema.sql...")
+    print("Reading schema.sql...")
     with open(schema_path, "r") as f:
         sql = f.read()
 
@@ -21,7 +21,7 @@ def init_db():
     
     db = SessionLocal()
     try:
-        print("🚀 Applying schema to database...")
+        print("Applying schema to database...")
         # We need to execute the SQL. 
         # Note: SQLAlchemy's execute(text(...)) might struggle with some multi-statement blobs depending on the driver.
         # But we'll try the direct approach first.
@@ -33,10 +33,10 @@ def init_db():
                 db.execute(text(stmt))
         
         db.commit()
-        print("✅ Schema applied successfully!")
+        print("Schema applied successfully!")
     except Exception as e:
         db.rollback()
-        print(f"❌ Error applying schema: {e}")
+        print(f"Error applying schema: {e}")
     finally:
         db.close()
 

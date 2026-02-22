@@ -18,7 +18,7 @@ def _connect():
         is_sqlite = False
         
         if not url:
-            print("⚠️ SUPABASE_DB_URL not found. Falling back to local SQLite.")
+            print("WARNING: SUPABASE_DB_URL not found. Falling back to local SQLite.")
             url = SQLITE_URL
             is_sqlite = True
         
@@ -32,13 +32,13 @@ def _connect():
                 conn.execute(text("SELECT 1"))
             
             _SessionLocal = sessionmaker(bind=_engine)
-            print(f"✅ Connected to {'Supabase' if not is_sqlite else 'Local SQLite'}")
+            print(f"Connected to {'Supabase' if not is_sqlite else 'Local SQLite'}")
         except Exception as e:
             if not is_sqlite:
-                print(f"❌ Failed to connect to Supabase: {e}. Falling back to SQLite.")
+                print(f"ERROR: Failed to connect to Supabase: {e}. Falling back to SQLite.")
                 _engine = create_engine(SQLITE_URL)
                 _SessionLocal = sessionmaker(bind=_engine)
-                print("✅ Connected to Local SQLite")
+                print("Connected to Local SQLite")
             else:
                 raise e
                 
@@ -65,6 +65,9 @@ class _LazySession:
     def rollback(self):
         if self._session:
             self._session.rollback()
+
+    def get_bind(self, *args, **kwargs):
+        return self._get().get_bind(*args, **kwargs)
 
     def close(self):
         if self._session:

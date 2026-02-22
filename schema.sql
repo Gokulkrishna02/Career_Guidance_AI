@@ -1,4 +1,4 @@
--- Database Schema for Career Guidance AI
+-- Database Schema for Career Guidance AI (v2)
 
 -- 1. Users table
 CREATE TABLE IF NOT EXISTS users (
@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS student_profiles (
     interest_area VARCHAR(255),
     location_preference VARCHAR(255),
     career_goal TEXT,
+    budget_lpa DECIMAL(10, 2) DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -61,11 +62,13 @@ CREATE TABLE IF NOT EXISTS placements (
     placement_percentage DECIMAL(5, 2)
 );
 
--- 7. Careers table
+-- 7. Careers table (extended with demand/growth scores)
 CREATE TABLE IF NOT EXISTS careers (
     career_id SERIAL PRIMARY KEY,
     career_name VARCHAR(255) UNIQUE NOT NULL,
-    avg_salary_lpa DECIMAL(10, 2)
+    avg_salary_lpa DECIMAL(10, 2),
+    demand_score INTEGER DEFAULT 70,
+    growth_score INTEGER DEFAULT 70
 );
 
 -- 8. Course-Careers mapping
@@ -106,9 +109,34 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 13. Student Skills (to track current knowledge)
+-- 13. Student Skills (current knowledge)
 CREATE TABLE IF NOT EXISTS student_skills (
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     skill_id INTEGER REFERENCES skills(skill_id) ON DELETE CASCADE,
+    added_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, skill_id)
 );
+
+-- 14. AI Feedback (NEW: user rates AI responses)
+CREATE TABLE IF NOT EXISTS ai_feedback (
+    feedback_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    session_id INTEGER REFERENCES chat_sessions(session_id) ON DELETE CASCADE,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 15. Skill Progress History (NEW: dynamic profile evolution)
+CREATE TABLE IF NOT EXISTS skill_progress (
+    progress_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    skill_id INTEGER REFERENCES skills(skill_id) ON DELETE CASCADE,
+    proficiency_level INTEGER DEFAULT 1 CHECK (proficiency_level BETWEEN 1 AND 5),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Migration helper: add budget_lpa and demand/growth if they don't exist
+ALTER TABLE student_profiles ADD COLUMN IF NOT EXISTS budget_lpa DECIMAL(10, 2);
+ALTER TABLE careers ADD COLUMN IF NOT EXISTS demand_score INTEGER DEFAULT 70;
+ALTER TABLE careers ADD COLUMN IF NOT EXISTS growth_score INTEGER DEFAULT 70;

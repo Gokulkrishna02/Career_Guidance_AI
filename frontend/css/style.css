@@ -1,130 +1,214 @@
-* {
-  box-sizing: border-box;
-  font-family: system-ui, sans-serif;
+/* ============================================================
+   Career AI — Global Design System
+   Premium Glassmorphism + Dark Theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font: 'Outfit', sans-serif;
+
+  /* Colors */
+  --bg-void:    #010510;
+  --bg-dark:    #020617;
+  --bg-card:    #0d1626;
+  --bg-glass:   rgba(15, 25, 50, 0.7);
+  --bg-glass2:  rgba(255,255,255,0.04);
+  --border:     rgba(255,255,255,0.07);
+  --border-act: rgba(99,102,241,0.5);
+
+  --accent:     #6366f1;
+  --accent-2:   #8b5cf6;
+  --accent-3:   #06b6d4;
+  --success:    #22c55e;
+  --warning:    #f59e0b;
+  --danger:     #ef4444;
+
+  --text-1:     #f1f5f9;
+  --text-2:     #94a3b8;
+  --text-3:     #64748b;
+
+  /* Gradients */
+  --grad-main:  linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+  --grad-card:  linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.05));
+  --grad-btn:   linear-gradient(135deg, #4f46e5, #7c3aed);
+
+  /* Effects */
+  --blur:       blur(16px);
+  --shadow-sm:  0 4px 16px rgba(0,0,0,0.3);
+  --shadow-md:  0 8px 32px rgba(0,0,0,0.4);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.5);
+  --shadow-acc: 0 8px 32px rgba(99,102,241,0.25);
+
+  --radius-sm:  8px;
+  --radius:     16px;
+  --radius-lg:  24px;
+  --radius-xl:  32px;
+
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html { scroll-behavior: smooth; }
 body {
-  margin: 0;
-  background: #0f172a;
-  color: #e5e7eb;
+  font-family: var(--font);
+  background: var(--bg-dark);
+  color: var(--text-1);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-.center {
-  display: flex;
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 99px; }
+
+/* ── Glass Card ───────────────────────────────────────────── */
+.glass-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Gradient Text ────────────────────────────────────────── */
+.grad-text {
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--grad-btn);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-acc);
 }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,102,241,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-.login-box {
-  background: #020617;
-  padding: 30px;
-  border-radius: 10px;
-  width: 300px;
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-glass2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
 }
+.btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-1); border-color: var(--border-act); }
 
-.login-box input {
+/* ── Form Inputs ──────────────────────────────────────────── */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.85rem; font-weight: 500; color: var(--text-2); letter-spacing: 0.02em; }
+
+.input-field {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  transition: var(--transition);
 }
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(99,102,241,0.08);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.input-field::placeholder { color: var(--text-3); }
+.input-field option { background: var(--bg-card); }
 
-.login-box button {
+/* ── Badges ──────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.badge-accent  { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+.badge-success { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+.badge-warning { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+.badge-danger  { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+/* ── Progress Bar ─────────────────────────────────────────── */
+.progress-track {
   width: 100%;
-  padding: 12px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--grad-main);
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.app {
-  display: flex;
-  height: 100vh;
+/* ── Skeleton Loading ─────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
 }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-.sidebar {
-  width: 260px;
-  background: #020617;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar h1 {
-  margin-bottom: 20px;
-}
-
-.sidebar button {
-  padding: 12px;
-  background: #2563eb;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-
-.profile {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid #334155;
-}
-
-.chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-header {
-  padding: 16px;
-  border-bottom: 1px solid #334155;
-  display: flex;
-  justify-content: space-between;
-}
-
-.messages {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.message {
-  padding: 14px;
-  border-radius: 10px;
-  max-width: 70%;
-}
-
-.message.assistant {
-  background: #1e293b;
-}
-
-.message.user {
-  background: #2563eb;
-  margin-left: auto;
-}
-
-.input-bar {
-  padding: 16px;
-  border-top: 1px solid #334155;
-  display: flex;
-  gap: 10px;
-}
-
-.input-bar input {
-  flex: 1;
-  padding: 14px;
-  border-radius: 8px;
-  border: none;
-}
-
-.input-bar button {
+/* ── Toast ────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
   padding: 14px 20px;
-  background: #2563eb;
-  border: none;
-  color: white;
-  border-radius: 8px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 9999;
+  animation: slideUp 0.3s ease;
+  box-shadow: var(--shadow-lg);
 }
+.toast-success { background: rgba(34,197,94,0.9); color: #fff; }
+.toast-error   { background: rgba(239,68,68,0.9); color: #fff; }
+.toast-info    { background: rgba(99,102,241,0.9); color: #fff; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Stars Rating ─────────────────────────────────────────── */
+.star-rating { display: flex; gap: 6px; }
+.star {
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-3);
+  user-select: none;
+}
+.star:hover, .star.active { color: #fbbf24; transform: scale(1.2); }

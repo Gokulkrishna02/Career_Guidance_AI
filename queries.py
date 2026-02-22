@@ -28,6 +28,12 @@ def get_user_by_email(db, email):
     return db.execute(query, {"email": email}).fetchone()
 
 
+def get_user_name(db, user_id):
+    query = text("SELECT name FROM users WHERE user_id = :user_id")
+    result = db.execute(query, {"user_id": user_id}).fetchone()
+    return result[0] if result else "Student"
+
+
 # =====================================================
 # STUDENT PROFILE
 # =====================================================
@@ -36,10 +42,10 @@ def create_student_profile(db, user_id, profile):
     query = text("""
         INSERT INTO student_profiles
         (user_id, education_level, class_or_degree, stream,
-         marks, category, interest_area, location_preference, career_goal)
+         marks, category, interest_area, location_preference, career_goal, budget_lpa)
         VALUES
         (:user_id, :education_level, :class_or_degree, :stream,
-         :marks, :category, :interest_area, :location_preference, :career_goal)
+         :marks, :category, :interest_area, :location_preference, :career_goal, :budget_lpa)
         ON CONFLICT (user_id) DO UPDATE SET
             education_level = EXCLUDED.education_level,
             class_or_degree = EXCLUDED.class_or_degree,
@@ -49,11 +55,20 @@ def create_student_profile(db, user_id, profile):
             interest_area = EXCLUDED.interest_area,
             location_preference = EXCLUDED.location_preference,
             career_goal = EXCLUDED.career_goal,
+            budget_lpa = EXCLUDED.budget_lpa,
             updated_at = CURRENT_TIMESTAMP
     """)
     db.execute(query, {
         "user_id": user_id,
-        **profile
+        "education_level": profile.get("education_level"),
+        "class_or_degree": profile.get("class_or_degree"),
+        "stream": profile.get("stream"),
+        "marks": profile.get("marks"),
+        "category": profile.get("category"),
+        "interest_area": profile.get("interest_area"),
+        "location_preference": profile.get("location_preference"),
+        "career_goal": profile.get("career_goal"),
+        "budget_lpa": profile.get("budget_lpa"),
     })
 
 
@@ -67,7 +82,8 @@ def get_profile_by_user_id(db, user_id):
             category,
             interest_area,
             location_preference,
-            career_goal
+            career_goal,
+            budget_lpa
         FROM student_profiles
         WHERE user_id = :user_id
     """)
@@ -75,16 +91,17 @@ def get_profile_by_user_id(db, user_id):
 
     if not row:
         return None
-    
+
     return {
         "education_level": row[0],
         "class_or_degree": row[1],
         "stream": row[2],
-        "marks": row[3],
+        "marks": float(row[3]) if row[3] else 0.0,
         "category": row[4],
         "interest_area": row[5],
         "location_preference": row[6],
-        "career_goal": row[7]
+        "career_goal": row[7],
+        "budget_lpa": float(row[8]) if row[8] else None,
     }
 
 
@@ -100,12 +117,21 @@ def update_student_profile(db, user_id, profile):
             interest_area = :interest_area,
             location_preference = :location_preference,
             career_goal = :career_goal,
+            budget_lpa = :budget_lpa,
             updated_at = CURRENT_TIMESTAMP
         WHERE user_id = :user_id
     """)
     db.execute(query, {
         "user_id": user_id,
-        **profile
+        "education_level": profile.get("education_level"),
+        "class_or_degree": profile.get("class_or_degree"),
+        "stream": profile.get("stream"),
+        "marks": profile.get("marks"),
+        "category": profile.get("category"),
+        "interest_area": profile.get("interest_area"),
+        "location_preference": profile.get("location_preference"),
+        "career_goal": profile.get("career_goal"),
+        "budget_lpa": profile.get("budget_lpa"),
     })
 
 
@@ -117,30 +143,10 @@ def get_course_id_by_name(db, course_name):
     query = text("""
         SELECT course_id
         FROM courses
-        WHERE course_name = :course_name
+        WHERE LOWER(course_name) = LOWER(:course_name)
     """)
     result = db.execute(query, {"course_name": course_name}).fetchone()
     return result[0] if result else None
-
-
-def get_eligible_colleges(db, marks, course_name, year, category):
-    query = text("""
-        SELECT c.college_name, cu.cutoff_mark
-        FROM cutoffs cu
-        JOIN colleges c ON cu.college_id = c.college_id
-        JOIN courses cr ON cu.course_id = cr.course_id
-        WHERE cr.course_name = :course_name
-          AND cu.year = :year
-          AND cu.category = :category
-          AND cu.cutoff_mark <= :marks
-        ORDER BY cu.cutoff_mark DESC
-    """)
-    return db.execute(query, {
-        "course_name": course_name,
-        "year": year,
-        "category": category,
-        "marks": marks
-    }).fetchall()
 
 
 def get_personalized_colleges(db, marks, category, course_id, year):
@@ -171,26 +177,27 @@ def get_personalized_colleges(db, marks, category, course_id, year):
     }).fetchall()
 
 
-def get_best_colleges_by_placement(db, course_name, year):
+def get_eligible_colleges(db, marks, course_name, year, category):
     query = text("""
-        SELECT
-            c.college_name,
-            p.avg_package_lpa,
-            p.placement_percentage
-        FROM placements p
-        JOIN colleges c ON p.college_id = c.college_id
-        JOIN courses cr ON p.course_id = cr.course_id
+        SELECT c.college_name, cu.cutoff_mark
+        FROM cutoffs cu
+        JOIN colleges c ON cu.college_id = c.college_id
+        JOIN courses cr ON cu.course_id = cr.course_id
         WHERE cr.course_name = :course_name
-          AND p.year = :year
-        ORDER BY p.avg_package_lpa DESC
+          AND cu.year = :year
+          AND cu.category = :category
+          AND cu.cutoff_mark <= :marks
+        ORDER BY cu.cutoff_mark DESC
     """)
     return db.execute(query, {
         "course_name": course_name,
-        "year": year
+        "year": year,
+        "category": category,
+        "marks": marks
     }).fetchall()
 
 
-def get_careers_after_course(db, course_name):
+def get_carriers_after_course(db, course_name):
     query = text("""
         SELECT ca.career_name, ca.avg_salary_lpa
         FROM course_careers cc
@@ -211,15 +218,6 @@ def get_skills_for_career(db, career_name):
         ORDER BY cs.importance_level DESC
     """)
     return db.execute(query, {"career_name": career_name}).fetchall()
-
-
-def get_courses_by_stream(db, stream):
-    query = text("""
-        SELECT course_name, degree
-        FROM courses
-        WHERE stream = :stream
-    """)
-    return db.execute(query, {"stream": stream}).fetchall()
 
 
 # =====================================================
@@ -243,15 +241,7 @@ def get_chat_sessions(db, user_id):
         ORDER BY created_at DESC
     """)
     rows = db.execute(query, {"user_id": user_id}).fetchall()
-
-    return [
-        {
-            "session_id": row[0],
-            "title": row[1]
-        }
-        for row in rows
-    ]
-
+    return [{"session_id": row[0], "title": row[1]} for row in rows]
 
 
 def get_user_id_by_session(db, session_id):
@@ -268,18 +258,6 @@ def get_user_id_by_session(db, session_id):
 # CHAT MESSAGES
 # =====================================================
 
-def save_chat_message(db, session_id, role, message):
-    query = text("""
-        INSERT INTO chat_messages (session_id, role, message)
-        VALUES (:session_id, :role, :message)
-    """)
-    db.execute(query, {
-        "session_id": session_id,
-        "role": role,
-        "message": message
-    })
-
-
 def get_chat_messages_by_session(db, session_id):
     query = text("""
         SELECT role, message, created_at
@@ -288,14 +266,8 @@ def get_chat_messages_by_session(db, session_id):
         ORDER BY created_at
     """)
     rows = db.execute(query, {"session_id": session_id}).fetchall()
+    return [{"role": row[0], "message": row[1]} for row in rows]
 
-    return [
-        {
-            "role": row[0],
-            "message": row[1]
-        }
-        for row in rows
-    ]
 
 def get_recent_chats(db, session_id, limit=5):
     query = text("""
@@ -305,21 +277,16 @@ def get_recent_chats(db, session_id, limit=5):
         ORDER BY created_at DESC
         LIMIT :limit
     """)
-    return db.execute(query, {
-        "session_id": session_id,
-        "limit": limit
-    }).fetchall()
+    return db.execute(query, {"session_id": session_id, "limit": limit}).fetchall()
+
 
 def save_chat(db, session_id, role, message):
     query = text("""
         INSERT INTO chat_messages (session_id, role, message)
         VALUES (:session_id, :role, :message)
     """)
-    db.execute(query, {
-        "session_id": session_id,
-        "role": role,
-        "message": message
-    })
+    db.execute(query, {"session_id": session_id, "role": role, "message": message})
+
 
 # =====================================================
 # SKILLS / GAP ANALYSIS
@@ -334,6 +301,17 @@ def get_student_skills(db, user_id):
     """)
     return db.execute(query, {"user_id": user_id}).fetchall()
 
+
+def get_student_skill_names(db, user_id) -> list:
+    query = text("""
+        SELECT s.skill_name
+        FROM student_skills ss
+        JOIN skills s ON ss.skill_id = s.skill_id
+        WHERE ss.user_id = :user_id
+    """)
+    return [row[0] for row in db.execute(query, {"user_id": user_id}).fetchall()]
+
+
 def add_student_skill(db, user_id, skill_id):
     query = text("""
         INSERT INTO student_skills (user_id, skill_id)
@@ -341,6 +319,15 @@ def add_student_skill(db, user_id, skill_id):
         ON CONFLICT DO NOTHING
     """)
     db.execute(query, {"user_id": user_id, "skill_id": skill_id})
+
+
+def remove_student_skill(db, user_id, skill_id):
+    query = text("""
+        DELETE FROM student_skills
+        WHERE user_id = :user_id AND skill_id = :skill_id
+    """)
+    db.execute(query, {"user_id": user_id, "skill_id": skill_id})
+
 
 def get_skill_gap(db, user_id, career_name):
     query_req = text("""
@@ -352,62 +339,118 @@ def get_skill_gap(db, user_id, career_name):
     """)
     required_skills = db.execute(query_req, {"career_name": career_name}).fetchall()
 
-    query_user = text("""
-        SELECT s.skill_name
-        FROM student_skills ss
-        JOIN skills s ON ss.skill_id = s.skill_id
-        WHERE ss.user_id = :user_id
-    """)
-    user_skills = {row[0] for row in db.execute(query_user, {"user_id": user_id}).fetchall()}
+    user_skills = {row for row in get_student_skill_names(db, user_id)}
 
     gap = []
     for skill, importance in required_skills:
         if skill not in user_skills:
             gap.append({"skill": skill, "importance": importance})
-    
+
     return sorted(gap, key=lambda x: x["importance"], reverse=True)
+
 
 def get_skill_id_by_name(db, skill_name):
     query = text("SELECT skill_id FROM skills WHERE skill_name = :name")
     result = db.execute(query, {"name": skill_name}).fetchone()
     return result[0] if result else None
 
+
 def create_skill(db, skill_name):
     query = text("INSERT INTO skills (skill_name) VALUES (:name) RETURNING skill_id")
     return db.execute(query, {"name": skill_name}).fetchone()[0]
 
+
 def get_ranked_careers(db, user_id):
-    # Fetch interest and goal
     profile = get_profile_by_user_id(db, user_id)
-    if not profile: return []
-    
+    if not profile:
+        return []
+
     interest = profile["interest_area"].lower()
-    
-    # Simple scoring: Base Score (Demand + Growth) + Fit (Interest match)
+
     query = text("""
-        SELECT 
-            career_name, 
-            demand_score, 
-            growth_score,
-            CASE 
-                WHEN LOWER(career_name) LIKE :interest THEN 30
-                ELSE 0
-            END as fit_score
+        SELECT
+            career_name,
+            demand_score,
+            growth_score
         FROM careers
-        ORDER BY (demand_score + growth_score + 
+        ORDER BY (demand_score + growth_score +
             CASE WHEN LOWER(career_name) LIKE :interest THEN 30 ELSE 0 END) DESC
         LIMIT 5
     """)
-    
+
     rows = db.execute(query, {"interest": f"%{interest}%"}).fetchall()
     return [
         {
             "name": row[0],
-            "score": row[1] + row[2] + row[3],
+            "score": row[1] + row[2],
             "demand": row[1],
             "growth": row[2]
         } for row in rows
     ]
 
 
+# =====================================================
+# FEEDBACK
+# =====================================================
 
+def save_feedback(db, user_id, session_id, rating, comment):
+    query = text("""
+        INSERT INTO ai_feedback (user_id, session_id, rating, comment)
+        VALUES (:user_id, :session_id, :rating, :comment)
+        RETURNING feedback_id
+    """)
+    return db.execute(query, {
+        "user_id": user_id,
+        "session_id": session_id,
+        "rating": rating,
+        "comment": comment
+    }).fetchone()[0]
+
+
+def get_avg_feedback_rating(db, user_id):
+    query = text("""
+        SELECT ROUND(AVG(rating)::numeric, 2)
+        FROM ai_feedback
+        WHERE user_id = :user_id
+    """)
+    result = db.execute(query, {"user_id": user_id}).fetchone()
+    return float(result[0]) if result and result[0] else None
+
+
+# =====================================================
+# SKILL PROGRESS
+# =====================================================
+
+def upsert_skill_progress(db, user_id, skill_id, proficiency_level):
+    query = text("""
+        INSERT INTO skill_progress (user_id, skill_id, proficiency_level)
+        VALUES (:user_id, :skill_id, :proficiency_level)
+        ON CONFLICT (user_id, skill_id)
+        DO UPDATE SET proficiency_level = EXCLUDED.proficiency_level,
+                      updated_at = CURRENT_TIMESTAMP
+    """)
+    db.execute(query, {
+        "user_id": user_id,
+        "skill_id": skill_id,
+        "proficiency_level": proficiency_level
+    })
+
+
+def get_skill_progress(db, user_id):
+    query = text("""
+        SELECT s.skill_name, sp.proficiency_level, sp.updated_at
+        FROM skill_progress sp
+        JOIN skills s ON sp.skill_id = s.skill_id
+        WHERE sp.user_id = :user_id
+        ORDER BY sp.updated_at DESC
+    """)
+    rows = db.execute(query, {"user_id": user_id}).fetchall()
+    return [
+        {
+            "skill": row[0],
+            "proficiency_level": row[1],
+            "label": ["Beginner", "Elementary", "Intermediate", "Advanced", "Expert"][row[1] - 1],
+            "updated_at": str(row[2])
+        }
+        for row in rows
+    ]

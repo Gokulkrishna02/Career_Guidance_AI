@@ -4,509 +4,1689 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Career AI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>Career AI — Dashboard</title>
+  <meta name="description"
+    content="Your personalized AI-powered career guidance dashboard. Chat, explore recommendations, and track your skill progress.">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    :root {
-      --sidebar-width: 280px;
-      --accent: #6366f1;
-      --bg-dark: #020617;
-      --bg-card: #0f172a;
-    }
-
+    /* ── Layout ───────────────────────────────────────────────── */
     body {
-      font-family: 'Outfit', sans-serif;
-      background: var(--bg-dark);
-      color: #e2e8f0;
-      margin: 0;
       display: flex;
       height: 100vh;
       overflow: hidden;
+      background: var(--bg-void);
     }
 
-    /* Sidebar */
+    /* ── Sidebar ─────────────────────────────────────────────── */
     .sidebar {
-      width: var(--sidebar-width);
+      width: 260px;
+      min-width: 260px;
       background: var(--bg-card);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      padding: 24px;
+      padding: 0;
+      overflow: hidden;
     }
 
-    .sidebar h1 {
-      font-size: 1.5rem;
-      margin-bottom: 32px;
-      background: linear-gradient(to right, #60a5fa, #a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .sidebar-header {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .nav-items {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-    }
-
-    .nav-item {
-      padding: 12px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: #94a3b8;
+    .brand-row {
       display: flex;
       align-items: center;
       gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--grad-main);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-acc);
+    }
+
+    .brand-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .brand-name span {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text-3);
+    }
+
+    /* User pill */
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-glass2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--grad-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      overflow: hidden;
+    }
+
+    .user-info strong {
+      font-size: 0.85rem;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-info small {
+      font-size: 0.72rem;
+      color: var(--text-3);
+    }
+
+    /* Nav */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-group-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 12px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-2);
+      font-size: 0.88rem;
+      font-weight: 500;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--font);
+    }
+
+    .nav-item .nav-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
     }
 
     .nav-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: white;
+      background: var(--bg-glass2);
+      color: var(--text-1);
     }
 
     .nav-item.active {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--accent);
-      font-weight: 600;
+      background: rgba(99, 102, 241, 0.12);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
 
-    .profile-section {
-      padding-top: 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    .nav-badge {
+      margin-left: auto;
+      min-width: 18px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 99px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
     }
 
-    /* Main Content */
+    /* New Chat btn */
+    .new-chat-btn {
+      margin: 0 12px 12px;
+      padding: 10px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px dashed rgba(99, 102, 241, 0.35);
+      border-radius: var(--radius-sm);
+      color: #a5b4fc;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .new-chat-btn:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-style: solid;
+    }
+
+    /* Session list */
+    #sessionList {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--text-2);
+      transition: var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-item:hover {
+      background: var(--bg-glass2);
+      color: var(--text-1);
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 10px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-radius: var(--radius-sm);
+      color: #f87171;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* ── Main Content ─────────────────────────────────────────── */
     .main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      position: relative;
+      overflow: hidden;
     }
 
     .view {
       display: none;
+      flex-direction: column;
       height: 100%;
-      padding: 40px;
       overflow-y: auto;
     }
 
     .view.active {
       display: flex;
-      flex-direction: column;
     }
 
-    /* Chat View */
+    .view-body {
+      padding: 32px 40px;
+      flex: 1;
+    }
+
+    .view-header {
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(2, 6, 23, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      flex-shrink: 0;
+    }
+
+    .view-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .view-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    /* ── Chat View ────────────────────────────────────────────── */
     #chatView {
       padding: 0;
+      overflow: hidden;
     }
 
-    .chat-container {
-      flex: 1;
+    .chat-layout {
       display: flex;
       flex-direction: column;
+      height: 100%;
     }
 
-    .chat-header {
-      padding: 20px 40px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .messages {
+    .messages-area {
       flex: 1;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
       overflow-y: auto;
-    }
-
-    .message {
-      max-width: 60%;
-      padding: 16px 20px;
-      border-radius: 20px;
-      line-height: 1.5;
-    }
-
-    .message.assistant {
-      background: #1e293b;
-      border-bottom-left-radius: 4px;
-    }
-
-    .message.user {
-      background: var(--accent);
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-
-    .input-area {
-      padding: 24px 40px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 28px 40px;
       display: flex;
+      flex-direction: column;
       gap: 16px;
     }
 
-    .input-area input {
-      flex: 1;
-      background: #1e293b;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 14px 20px;
-      border-radius: 12px;
-      color: white;
-      font-size: 1rem;
+    .msg {
+      display: flex;
+      gap: 12px;
+      max-width: 75%;
+      animation: msgIn 0.2s ease;
     }
 
-    .send-btn {
-      background: var(--accent);
-      color: white;
+    @keyframes msgIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .msg.assistant .msg-avatar {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+
+    .msg.user .msg-avatar {
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+    }
+
+    .msg-bubble {
+      padding: 13px 18px;
+      border-radius: 18px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .msg.assistant .msg-bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+      color: var(--text-1);
+    }
+
+    .msg.user .msg-bubble {
+      background: var(--grad-btn);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: var(--shadow-acc);
+    }
+
+    /* Typing indicator */
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      padding: 6px 0;
+      align-items: center;
+    }
+
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      background: var(--text-3);
+      border-radius: 50%;
+      animation: dot 1.4s ease-in-out infinite;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dot {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Feedback bar below assistant message */
+    .msg-feedback {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding-left: 44px;
+    }
+
+    .feedback-label {
+      font-size: 0.72rem;
+      color: var(--text-3);
+    }
+
+    .fb-star {
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--text-3);
+      transition: var(--transition);
+    }
+
+    .fb-star:hover,
+    .fb-star.lit {
+      color: #fbbf24;
+    }
+
+    /* Input bar */
+    .chat-input-bar {
+      padding: 16px 40px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      background: var(--bg-void);
+      flex-shrink: 0;
+    }
+
+    #chatInput {
+      flex: 1;
+      resize: none;
+      min-height: 46px;
+      max-height: 140px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      transition: var(--transition);
+    }
+
+    #chatInput:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    #chatInput::placeholder {
+      color: var(--text-3);
+    }
+
+    #sendBtn {
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-sm);
       border: none;
-      padding: 0 24px;
-      border-radius: 12px;
+      background: var(--grad-btn);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-acc);
+    }
+
+    #sendBtn:hover {
+      transform: scale(1.05);
+    }
+
+    #sendBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Shared view styles ───────────────────────────────────── */
+    .section-heading {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .section-sub {
+      color: var(--text-2);
+      font-size: 0.88rem;
+      margin-bottom: 24px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .data-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .data-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad-main);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .data-card:hover {
+      border-color: var(--border-act);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .data-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-label {
+      font-size: 0.72rem;
       font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+
+    .card-sub {
+      font-size: 0.8rem;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
+
+    /* Stat row */
+    .stat-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-box {
+      flex: 1;
+      padding: 18px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .stat-icon-blue {
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    .stat-icon-green {
+      background: rgba(34, 197, 94, 0.15);
+    }
+
+    .stat-icon-amber {
+      background: rgba(245, 158, 11, 0.15);
+    }
+
+    .stat-icon-cyan {
+      background: rgba(6, 182, 212, 0.15);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-3);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    /* ── Recommendations View ─────────────────────────────────── */
+    .rec-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .ai-roadmap-box {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.04));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      display: none;
+    }
+
+    .ai-roadmap-box h3 {
+      color: #a78bfa;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #aiGuidanceContent {
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 0.9rem;
+      color: var(--text-2);
+    }
+
+    /* ── Career Rankings (Insights) ───────────────────────────── */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .insights-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .career-rank-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: var(--transition);
+      margin-bottom: 10px;
+    }
+
+    .career-rank-card:hover {
+      border-color: var(--border-act);
+      transform: translateX(4px);
+    }
+
+    .rank-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #a5b4fc;
+      flex-shrink: 0;
+    }
+
+    .rank-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rank-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .rank-meta {
+      font-size: 0.75rem;
+      color: var(--text-3);
+    }
+
+    .rank-score {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      flex-shrink: 0;
+    }
+
+    /* Score bar */
+    .score-bar-wrap {
+      margin-top: 6px;
+    }
+
+    /* Skill gap */
+    .gap-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .gap-item:last-child {
+      border-bottom: none;
+    }
+
+    .gap-skill-name {
+      font-size: 0.9rem;
+    }
+
+    .importance-bar {
+      width: 60px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .importance-fill {
+      height: 100%;
+      background: var(--danger);
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── Skill Progress View ──────────────────────────────────── */
+    .skill-progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .sp-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(99, 102, 241, 0.12);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .sp-info {
+      flex: 1;
+    }
+
+    .sp-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .sp-label {
+      font-size: 0.75rem;
+      color: var(--text-3);
+    }
+
+    .sp-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .sp-slider {
+      width: 100px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+      outline: none;
       cursor: pointer;
     }
 
-    /* Recommendations View */
-    .rec-grid {
+    .sp-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Add skill form */
+    .add-skill-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Profile View ──────────────────────────────────────────── */
+    .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 24px;
-      margin-top: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
-    .rec-card {
+    .profile-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-field .field-label {
+      font-size: 0.75rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .profile-field .field-value {
+      font-size: 0.95rem;
+      color: var(--text-1);
+      font-weight: 500;
+    }
+
+    /* ── Feedback modal ───────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
       background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 24px;
-      border-radius: 20px;
-      transition: transform 0.2s;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.3s ease;
     }
 
-    .rec-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
+    .modal-box h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
     }
 
-    .rec-card h3 {
-      margin: 0 0 12px 0;
-      color: white;
+    .modal-box p {
+      color: var(--text-2);
+      font-size: 0.88rem;
+      margin-bottom: 20px;
     }
 
-    .rec-card p {
-      color: #94a3b8;
-      font-size: 0.9rem;
-      margin: 4px 0;
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
     }
 
-    .highlight {
-      color: #60a5fa;
-      font-weight: 600;
+    /* ── Loading skeleton for cards ───────────────────────────── */
+    .loading-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .skel-card {
+      height: 120px;
+      border-radius: var(--radius);
+    }
+
+    /* ── Scrollable sections ──────────────────────────────────── */
+    .scrollable {
+      overflow-y: auto;
     }
   </style>
 </head>
 
 <body>
 
+  <!-- ════ SIDEBAR ════════════════════════════════════════════════ -->
   <aside class="sidebar">
-    <h1>Career AI</h1>
-    <div class="nav-items">
-      <div class="nav-item active" onclick="switchView('chat')">💬 Career Chat</div>
-      <button class="nav-item"
-        style="width: 100%; border: none; background: rgba(99, 102, 241, 0.2); color: white; margin-bottom: 20px;"
-        onclick="createNewChat()">+ New Chat</button>
-      <div class="nav-item" onclick="switchView('recommendations')">🎓 Recommendations</div>
-      <div class="nav-item" onclick="switchView('insights')">📈 Career Insights</div>
-      <div class="nav-item" onclick="switchView('profile')">👤 My Profile</div>
+    <div class="sidebar-header">
+      <div class="brand-row">
+        <div class="brand-icon">🎯</div>
+        <div class="brand-name">
+          Career AI
+          <span>Guidance System</span>
+        </div>
+      </div>
+      <div class="user-pill">
+        <div class="avatar" id="avatarEl">K</div>
+        <div class="user-info">
+          <strong id="userNameEl">Loading...</strong>
+          <small id="userStreamEl">Student</small>
+        </div>
+      </div>
     </div>
-    <div class="profile-section">
-      <button class="nav-item" style="width: 100%; border: none; background: transparent;" onclick="handleLogout()">🚪
-        Logout</button>
+
+    <nav class="sidebar-nav" role="navigation">
+      <div class="nav-group-label">Chat</div>
+      <button class="nav-item active" id="nav-chat" onclick="switchView('chat', this)">
+        <span class="nav-icon">💬</span> Career Chat
+      </button>
+      <button class="new-chat-btn" onclick="createNewChat()">＋ New Chat</button>
+
+      <div class="nav-group-label">Sessions</div>
+      <div id="sessionList">
+        <div class="session-item" style="color:var(--text-3);font-style:italic;">No sessions yet</div>
+      </div>
+
+      <div class="nav-group-label">Explore</div>
+      <button class="nav-item" id="nav-recommendations" onclick="switchView('recommendations', this)">
+        <span class="nav-icon">🎓</span> Recommendations
+      </button>
+      <button class="nav-item" id="nav-insights" onclick="switchView('insights', this)">
+        <span class="nav-icon">📊</span> Career Insights
+      </button>
+      <button class="nav-item" id="nav-skills" onclick="switchView('skills', this)">
+        <span class="nav-icon">🛠️</span> Skill Progress
+      </button>
+      <button class="nav-item" id="nav-profile" onclick="switchView('profile', this)">
+        <span class="nav-icon">👤</span> My Profile
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
     </div>
   </aside>
 
+  <!-- ════ MAIN CONTENT ════════════════════════════════════════════ -->
   <main class="main-content">
-    <!-- Chat View -->
+
+    <!-- ── Chat View ──────────────────────────────────────────── -->
     <div id="chatView" class="view active">
-      <div class="chat-container">
-        <header class="chat-header">
-          <h2>Career Guidance Assistant</h2>
-          <span id="sessionStatus" style="color: #4ade80; font-size: 0.8rem;">● Active Session</span>
-        </header>
-        <div id="chatMessages" class="messages">
-          <div class="message assistant">
-            Hello! I'm your AI career advisor. Based on your profile, I can suggest colleges, courses, and roadmaps. How
-            can I help you today?
+      <div class="chat-layout">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Career Guidance Chat</div>
+            <div class="view-subtitle" id="chatSessionLabel">Ask me anything about careers, colleges, or skills</div>
           </div>
-        </div>
-        <div class="input-area">
-          <input type="text" id="userInput" placeholder="Ask about colleges, careers, or skills...">
-          <button class="send-btn" onclick="sendMessage()">Send</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recommendations View -->
-    <div id="recView" class="view">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <div>
-          <h2 style="margin: 0;">Recommended for You</h2>
-          <p style="color: #94a3b8; margin: 4px 0 0 0;">Based on your marks and interest area.</p>
-        </div>
-        <button class="send-btn" onclick="generateAiGuidance()">✨ Generate AI Roadmap</button>
-      </div>
-
-      <div id="aiGuidanceBox" class="rec-card"
-        style="display: none; margin-bottom: 32px; border-color: #a855f7; background: rgba(168, 85, 247, 0.05); position: relative;">
-        <h3 style="color: #a855f7; margin-top: 0;">AI Career Roadmap</h3>
-        <div id="aiGuidanceContent" style="white-space: pre-wrap; line-height: 1.6; color: #cbd5e1;"></div>
-      </div>
-
-      <div id="recGrid" class="rec-grid">
-        <!-- Recommendations will be injected here -->
-        <p>Loading recommendations...</p>
-      </div>
-    </div>
-
-    <!-- Insights View -->
-    <div id="insightsView" class="view">
-      <div style="display: flex; gap: 24px;">
-        <!-- Career Ranking -->
-        <div style="flex: 1;">
-          <h2>Top Career Matches</h2>
-          <div id="rankingGrid" class="rec-grid" style="grid-template-columns: 1fr;">
-            <p>Loading rankings...</p>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-ghost" onclick="openFeedbackModal()" style="font-size:0.82rem;padding:8px 14px;">⭐ Rate
+              AI</button>
           </div>
         </div>
 
-        <!-- Skill Gap -->
-        <div style="flex: 1;">
-          <h2>Skill Gap Analysis</h2>
-          <div id="skillGapBox" class="rec-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
-            <h3>Missing Skills for Your Goal</h3>
-            <ul id="skillGapList" style="padding-left: 20px; line-height: 2;">
-              <li>Loading analysis...</li>
-            </ul>
-          </div>
-
-          <div class="rec-card" style="margin-top: 24px;">
-            <h3>Web Data Explorer</h3>
-            <p style="font-size: 0.8rem; margin-bottom: 12px;">Search for careers not in our database.</p>
-            <div style="display: flex; gap: 10px;">
-              <input type="text" id="webSearchInput" placeholder="e.g. Prompt Engineer"
-                style="padding: 10px; flex: 1; background: #020617; border: 1px solid #334155; color: white;">
-              <button class="send-btn" onclick="performWebSearch()" style="padding: 10px 15px;">Search</button>
+        <div class="messages-area" id="chatMessages">
+          <div class="msg assistant">
+            <div class="msg-avatar">🎯</div>
+            <div>
+              <div class="msg-bubble">
+                Hello! I'm your AI career advisor. I can help you explore careers, understand entrance exams, identify
+                skill gaps, and build a personalized roadmap. What would you like to know today?
+              </div>
             </div>
-            <div id="webSearchResult" style="margin-top: 15px; font-size: 0.9rem; color: #cbd5e1;"></div>
+          </div>
+
+          <!-- Quick prompts -->
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding-left:44px;">
+            <button class="btn-ghost" style="font-size:0.8rem;padding:7px 14px;"
+              onclick="quickPrompt('What career suits me best based on my profile?')">🎯 Best career for me</button>
+            <button class="btn-ghost" style="font-size:0.8rem;padding:7px 14px;"
+              onclick="quickPrompt('What skills should I learn next?')">🛠️ Skills to learn</button>
+            <button class="btn-ghost" style="font-size:0.8rem;padding:7px 14px;"
+              onclick="quickPrompt('Give me a 6-month study roadmap')">🗺️ 6-month roadmap</button>
+            <button class="btn-ghost" style="font-size:0.8rem;padding:7px 14px;"
+              onclick="quickPrompt('Which exams should I prepare for?')">📝 Entrance exams</button>
+          </div>
+        </div>
+
+        <div class="chat-input-bar">
+          <textarea id="chatInput" placeholder="Ask about careers, colleges, skills, exams..." rows="1"></textarea>
+          <button id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Recommendations View ───────────────────────────────── -->
+    <div id="recommendationsView" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">🎓 College Recommendations</div>
+          <div class="view-subtitle">Matched to your marks, category, and interest area</div>
+        </div>
+        <button class="btn-primary" onclick="generateAiGuidance()" style="padding:10px 18px;font-size:0.85rem;">✨
+          Generate AI Roadmap</button>
+      </div>
+      <div class="view-body">
+        <div id="aiGuidanceBox" class="ai-roadmap-box">
+          <h3>✨ AI-Generated Career Roadmap</h3>
+          <div id="aiGuidanceContent">Generating...</div>
+        </div>
+        <div id="recGrid" class="card-grid">
+          <div class="skel-card skeleton"></div>
+          <div class="skel-card skeleton"></div>
+          <div class="skel-card skeleton"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Insights View ──────────────────────────────────────── -->
+    <div id="insightsView" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">📊 Career Insights</div>
+          <div class="view-subtitle">AI-scored career matches and skill gap analysis</div>
+        </div>
+        <div>
+          <input id="webSearchInput" class="input-field" type="text" placeholder="Search any career..."
+            style="width:180px;font-size:0.82rem;padding:8px 12px;display:inline-block;"
+            onkeydown="if(event.key==='Enter') performWebSearch()">
+          <button class="btn-primary" onclick="performWebSearch()"
+            style="padding:9px 16px;font-size:0.82rem;margin-left:6px;">🔍 Search</button>
+        </div>
+      </div>
+      <div class="view-body">
+        <!-- Web result -->
+        <div id="webSearchResult" style="display:none;margin-bottom:20px;" class="data-card"></div>
+
+        <div class="insights-grid">
+          <!-- Career Rankings -->
+          <div>
+            <div class="section-heading" style="font-size:1.05rem;margin-bottom:16px;">🏆 Top Career Matches</div>
+            <div id="rankingList">
+              <div class="skel-card skeleton" style="height:80px;"></div>
+              <div class="skel-card skeleton" style="height:80px;margin-top:10px;"></div>
+              <div class="skel-card skeleton" style="height:80px;margin-top:10px;"></div>
+            </div>
+          </div>
+
+          <!-- Skill Gap -->
+          <div>
+            <div class="section-heading" style="font-size:1.05rem;margin-bottom:16px;">🎯 Skill Gap Analysis</div>
+            <div class="data-card" style="padding:20px;">
+              <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:14px;" id="skillGapCareer">For your career
+                goal</div>
+              <div id="skillGapList">
+                <div class="skeleton" style="height:16px;margin-bottom:10px;border-radius:4px;"></div>
+              </div>
+            </div>
+
+            <div class="data-card" style="margin-top:16px;padding:20px;">
+              <div style="font-size:0.85rem;font-weight:600;margin-bottom:12px;">🌐 Explore Career Online</div>
+              <p style="font-size:0.78rem;color:var(--text-3);margin-bottom:12px;">Find careers not in our database</p>
+              <div id="webResultInline"
+                style="font-size:0.82rem;color:var(--text-2);display:none;margin-bottom:12px;line-height:1.6;"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Profile View -->
-    <div id="profileView" class="view">
-      <h2>Your Profile</h2>
-      <div id="profileDetails" class="rec-card" style="max-width: 500px;">
-        <!-- Profile data injected here -->
+    <!-- ── Skill Progress View ────────────────────────────────── -->
+    <div id="skillsView" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">🛠️ Skill Progress Tracker</div>
+          <div class="view-subtitle">Track your learning journey and proficiency levels</div>
+        </div>
       </div>
-      <button class="send-btn" style="margin-top: 20px; width: fit-content;"
-        onclick="window.location.href='profile-setup.html'">Edit Profile</button>
+      <div class="view-body">
+        <!-- Add skill -->
+        <div class="add-skill-row">
+          <input id="newSkillInput" class="input-field" type="text"
+            placeholder="Add a new skill (e.g. React, Deep Learning)" style="flex:1;"
+            onkeydown="if(event.key==='Enter') addNewSkill()">
+          <select id="newSkillLevel" class="input-field" style="width:140px;">
+            <option value="1">Beginner</option>
+            <option value="2">Elementary</option>
+            <option value="3" selected>Intermediate</option>
+            <option value="4">Advanced</option>
+            <option value="5">Expert</option>
+          </select>
+          <button class="btn-primary" onclick="addNewSkill()" style="padding:12px 20px;">＋ Add</button>
+        </div>
+
+        <div id="skillProgressList" class="skill-progress-list">
+          <div class="skel-card skeleton" style="height:60px;border-radius:12px;"></div>
+          <div class="skel-card skeleton" style="height:60px;border-radius:12px;margin-top:10px;"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ── Profile View ───────────────────────────────────────── -->
+    <div id="profileView" class="view">
+      <div class="view-header">
+        <div>
+          <div class="view-title">👤 My Profile</div>
+          <div class="view-subtitle">Your academic background and career preferences</div>
+        </div>
+        <button class="btn-primary" onclick="window.location.href='profile-setup.html'"
+          style="padding:10px 18px;font-size:0.85rem;">✏️ Edit Profile</button>
+      </div>
+      <div class="view-body">
+        <div class="data-card" style="padding:28px;max-width:640px;margin-bottom:24px;">
+          <div id="profileContent">
+            <div class="skeleton" style="height:16px;width:60%;border-radius:4px;margin-bottom:12px;"></div>
+            <div class="skeleton" style="height:16px;width:40%;border-radius:4px;margin-bottom:12px;"></div>
+            <div class="skeleton" style="height:16px;width:70%;border-radius:4px;"></div>
+          </div>
+        </div>
+
+        <!-- Skills card -->
+        <div class="data-card" style="padding:24px;max-width:640px;">
+          <div style="font-size:0.88rem;font-weight:600;color:var(--text-2);margin-bottom:14px;">🛠️ Current Skills
+          </div>
+          <div id="profileSkillsList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
+
+  <!-- ── Feedback Modal ────────────────────────────────── -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal-box glass-card">
+      <h3>⭐ Rate AI Guidance</h3>
+      <p>How helpful was Career AI's guidance? Your feedback improves recommendations.</p>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;">
+        <span class="feedback-label">Rating:</span>
+        <div class="star-rating" id="modalStars">
+          <span class="star" onclick="setModalRating(1)">★</span>
+          <span class="star" onclick="setModalRating(2)">★</span>
+          <span class="star" onclick="setModalRating(3)">★</span>
+          <span class="star" onclick="setModalRating(4)">★</span>
+          <span class="star" onclick="setModalRating(5)">★</span>
+        </div>
+      </div>
+      <textarea id="feedbackComment" class="input-field" rows="3" placeholder="Any specific comments? (optional)"
+        style="resize:vertical;"></textarea>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeFeedbackModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/api.js"></script>
   <script>
+    // ─── State ───────────────────────────────────────────────────
     const userId = localStorage.getItem("user_id");
     if (!userId) window.location.href = "login.html";
 
     let currentSessionId = null;
+    let currentFeedbackRating = 0;
+    let currentView = "chat";
 
-    function createNewChat() {
-      currentSessionId = null;
-      document.getElementById('chatMessages').innerHTML = `
-                <div class="message assistant">
-                    Session reset. How can I help you with your career today?
-                </div>
-            `;
-      switchView('chat');
+    // ─── Init ────────────────────────────────────────────────────
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadUserInfo();
+      guardProfile();
+      loadSessions();
+    });
+
+    async function guardProfile() {
+      if (localStorage.getItem("profile_setup") === "true") return;
+      try {
+        const res = await api(`/profile/${userId}`);
+        if (!res || res.error) {
+          window.location.href = "profile-setup.html";
+        } else {
+          localStorage.setItem("profile_setup", "true");
+        }
+      } catch (e) { }
     }
 
-    // View Switching
-    function switchView(view) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
-
-      if (view === 'chat') {
-        document.getElementById('chatView').classList.add('active');
-        event.currentTarget.classList.add('active');
-      } else if (view === 'recommendations') {
-        document.getElementById('recView').classList.add('active');
-        event.currentTarget.classList.add('active');
-        loadRecommendations();
-      } else if (view === 'insights') {
-        document.getElementById('insightsView').classList.add('active');
-        event.currentTarget.classList.add('active');
-        loadInsights();
-      } else if (view === 'profile') {
-        document.getElementById('profileView').classList.add('active');
-        event.currentTarget.classList.add('active');
-        loadProfile();
-      }
+    async function loadUserInfo() {
+      try {
+        const p = await api(`/profile/${userId}`);
+        if (p && !p.error) {
+          const name = p.name || localStorage.getItem("user_name") || "Student";
+          document.getElementById("userNameEl").textContent = name;
+          document.getElementById("avatarEl").textContent = name[0].toUpperCase();
+          document.getElementById("userStreamEl").textContent = p.stream || p.education_level || "Student";
+        }
+      } catch (e) { }
     }
 
-    // Chat Logic
+    // ─── View Switching ──────────────────────────────────────────
+    function switchView(view, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+
+      const viewMap = {
+        chat: "chatView",
+        recommendations: "recommendationsView",
+        insights: "insightsView",
+        skills: "skillsView",
+        profile: "profileView",
+      };
+
+      document.getElementById(viewMap[view]).classList.add("active");
+      if (btn) btn.classList.add("active");
+      currentView = view;
+
+      if (view === "recommendations") loadRecommendations();
+      if (view === "insights") loadInsights();
+      if (view === "skills") loadSkillProgress();
+      if (view === "profile") loadProfile();
+    }
+
+    // ─── Chat ────────────────────────────────────────────────────
     async function getOrCreateSession() {
       if (currentSessionId) return currentSessionId;
       const res = await api(`/chat/session/${userId}`, "POST");
       currentSessionId = res.session_id;
+      await loadSessions();
       return currentSessionId;
     }
 
     async function sendMessage() {
-      const input = document.getElementById('userInput');
+      const input = document.getElementById("chatInput");
       const text = input.value.trim();
       if (!text) return;
 
-      addMessage(text, 'user');
-      input.value = '';
+      appendMessage(text, "user");
+      input.value = "";
+      autoResize(input);
 
       const sessionId = await getOrCreateSession();
 
-      // Show thinking
-      const thinkingDiv = addMessage('Thinking...', 'assistant');
+      // Typing indicator
+      const typingEl = appendTyping();
 
-      const res = await api(`/chat/${sessionId}?message=${encodeURIComponent(text)}`, "POST");
-
-      thinkingDiv.remove();
-      addMessage(res.reply || res.error || "Sorry, I couldn't process that.", 'assistant');
+      document.getElementById("sendBtn").disabled = true;
+      try {
+        const res = await api(`/chat/${sessionId}?message=${encodeURIComponent(text)}`, "POST");
+        typingEl.remove();
+        const reply = res.reply || res.error || "Sorry, I couldn't process that.";
+        appendMessage(reply, "assistant");
+      } catch (e) {
+        typingEl.remove();
+        appendMessage("⚠️ Could not reach the server. Please check the backend.", "assistant");
+      } finally {
+        document.getElementById("sendBtn").disabled = false;
+      }
     }
 
-    function addMessage(text, role) {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-      div.className = `message ${role}`;
-      div.textContent = text;
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-      return div;
+    function quickPrompt(text) {
+      document.getElementById("chatInput").value = text;
+      sendMessage();
     }
 
-    // Recommendations Logic
+    function appendMessage(text, role) {
+      const area = document.getElementById("chatMessages");
+      const msg = document.createElement("div");
+      msg.className = `msg ${role}`;
+      msg.innerHTML = `
+    <div class="msg-avatar">${role === "assistant" ? "🎯" : "👤"}</div>
+    <div>
+      <div class="msg-bubble">${escHtml(text)}</div>
+    </div>
+  `;
+      area.appendChild(msg);
+      area.scrollTop = area.scrollHeight;
+      return msg;
+    }
+
+    function appendTyping() {
+      const area = document.getElementById("chatMessages");
+      const msg = document.createElement("div");
+      msg.className = "msg assistant";
+      msg.innerHTML = `
+    <div class="msg-avatar">🎯</div>
+    <div class="msg-bubble" style="padding:14px 18px;">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  `;
+      area.appendChild(msg);
+      area.scrollTop = area.scrollHeight;
+      return msg;
+    }
+
+    function escHtml(t) {
+      return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+    }
+
+    function createNewChat() {
+      currentSessionId = null;
+      document.getElementById("chatMessages").innerHTML = `
+    <div class="msg assistant">
+      <div class="msg-avatar">🎯</div>
+      <div><div class="msg-bubble">New session started! How can I help you today?</div></div>
+    </div>
+  `;
+      switchView("chat", document.getElementById("nav-chat"));
+    }
+
+    async function loadSessions() {
+      try {
+        const sessions = await api(`/chat/sessions/${userId}`);
+        const list = document.getElementById("sessionList");
+        if (!sessions || !sessions.length) {
+          list.innerHTML = `<div class="session-item" style="color:var(--text-3);font-style:italic;">No sessions yet</div>`;
+          return;
+        }
+        list.innerHTML = sessions.slice(0, 6).map(s => `
+      <div class="session-item" onclick="loadSession(${s.session_id})">
+        💬 ${escHtml(s.title || "Chat #" + s.session_id)}
+      </div>
+    `).join("");
+      } catch (e) { }
+    }
+
+    async function loadSession(sessionId) {
+      currentSessionId = sessionId;
+      document.getElementById("chatSessionLabel").textContent = "Session #" + sessionId;
+      const msgs = await api(`/chat/messages/${sessionId}`);
+      const area = document.getElementById("chatMessages");
+      area.innerHTML = "";
+      if (msgs && msgs.length) {
+        msgs.forEach(m => appendMessage(m.message, m.role));
+      }
+      switchView("chat", document.getElementById("nav-chat"));
+    }
+
+    // Auto-resize textarea
+    document.getElementById("chatInput").addEventListener("input", function () { autoResize(this); });
+    document.getElementById("chatInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 140) + "px";
+    }
+
+    // ─── Recommendations ─────────────────────────────────────────
     async function loadRecommendations() {
-      const grid = document.getElementById('recGrid');
-      const res = await api(`/personalized-recommendation/${userId}`);
-
-      if (res.error) {
-        grid.innerHTML = `<p>${res.error}</p>`;
-        return;
+      const grid = document.getElementById("recGrid");
+      grid.innerHTML = `<div class="skel-card skeleton"></div><div class="skel-card skeleton"></div><div class="skel-card skeleton"></div>`;
+      try {
+        const res = await api(`/personalized-recommendation/${userId}`);
+        if (!res.recommendations || !res.recommendations.length) {
+          grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:40px 20px;">
+          <div style="font-size:2rem;margin-bottom:12px;">🏫</div>
+          <div style="font-weight:600;margin-bottom:6px;">No college data available yet</div>
+          <div style="color:var(--text-3);font-size:0.88rem;">${res.note || "Try the Career Chat for AI-powered guidance."}</div>
+        </div>`;
+          return;
+        }
+        const statusColor = { "Within Budget": "badge-success", "High Value": "badge-accent", "Expensive": "badge-warning" };
+        grid.innerHTML = res.recommendations.map(r => `
+      <div class="data-card">
+        <div class="card-label">College</div>
+        <div class="card-value" style="font-size:1.05rem;">${r.college}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+          <span class="badge badge-accent">Cutoff: ${r.cutoff}</span>
+          <span class="badge badge-success">📦 ${r.avg_package_lpa} LPA</span>
+          <span class="badge ${statusColor[r.status] || 'badge-accent'}">${r.status}</span>
+        </div>
+        <div class="card-sub" style="margin-top:8px;">Placement: <strong>${r.placement_percentage}%</strong></div>
+      </div>
+    `).join("");
+      } catch (e) {
+        grid.innerHTML = `<div style="color:var(--text-3);">Could not load recommendations.</div>`;
       }
-
-      grid.innerHTML = res.recommendations.map(r => `
-                <div class="rec-card">
-                    <h3>${r.college}</h3>
-                    <p>Cutoff: <span class="highlight">${r.cutoff}</span></p>
-                    <p>Avg Package: <span class="highlight">${r.avg_package_lpa} LPA</span></p>
-                    <p>Placement: <span class="highlight">${r.placement_percentage}%</span></p>
-                </div>
-            `).join('');
     }
 
-    // AI Guidance Logic
     async function generateAiGuidance() {
-      const box = document.getElementById('aiGuidanceBox');
-      const content = document.getElementById('aiGuidanceContent');
-
-      box.style.display = 'block';
-      content.textContent = 'Generating your personalized roadmap...';
-      box.scrollIntoView({ behavior: 'smooth' });
-
-      const res = await api(`/ai-guidance/${userId}`);
-
-      if (res.error) {
-        content.textContent = res.error;
-      } else {
-        content.textContent = res.ai_guidance;
+      const box = document.getElementById("aiGuidanceBox");
+      const content = document.getElementById("aiGuidanceContent");
+      box.style.display = "block";
+      content.textContent = "Generating your personalized roadmap... ✨";
+      box.scrollIntoView({ behavior: "smooth" });
+      try {
+        const res = await api(`/ai-guidance/${userId}`);
+        content.textContent = res.ai_guidance || res.error || "Could not generate guidance.";
+      } catch (e) {
+        content.textContent = "⚠️ Could not reach the server.";
       }
     }
 
+    // ─── Insights ────────────────────────────────────────────────
     async function loadInsights() {
-      // 1. Load Rankings
-      const rankGrid = document.getElementById('rankingGrid');
-      const rankRes = await api(`/career-ranking/${userId}`);
-      if (rankRes.rankings) {
-        rankGrid.innerHTML = rankRes.rankings.map(c => `
-          <div class="rec-card">
-            <h3>${c.name}</h3>
-            <p>Match Score: <span class="highlight">${c.score}%</span></p>
-            <p>Demand: ${c.demand} | Growth: ${c.growth}</p>
-          </div>
-        `).join('');
-      }
+      loadCareerRankings();
+      loadSkillGap();
+    }
 
-      // 2. Load Skill Gap
-      const gapList = document.getElementById('skillGapList');
-      const gapRes = await api(`/skill-gap/${userId}`);
-      if (gapRes.missing_skills) {
-        gapList.innerHTML = gapRes.missing_skills.length > 0
-          ? gapRes.missing_skills.map(s => `<li>${s.skill} <small>(Priority: ${s.importance})</small></li>`).join('')
-          : "<li>You have all the required skills for this role! 🎉</li>";
-      } else {
-        gapList.innerHTML = `<li>${gapRes.error || "Could not analyze gap"}</li>`;
+    async function loadCareerRankings() {
+      const list = document.getElementById("rankingList");
+      list.innerHTML = `<div class="skel-card skeleton" style="height:80px;"></div>`.repeat(3);
+      try {
+        const res = await api(`/career-ranking/${userId}`);
+        if (!res.rankings || !res.rankings.length) {
+          list.innerHTML = `<div style="color:var(--text-3);font-size:0.88rem;">Complete your profile to see career matches.</div>`;
+          return;
+        }
+        list.innerHTML = res.rankings.map((c, i) => `
+      <div class="career-rank-card">
+        <div class="rank-num">${i + 1}</div>
+        <div class="rank-info">
+          <div class="rank-name">${c.name}</div>
+          <div class="score-bar-wrap">
+            <div class="progress-track" style="width:100%;max-width:200px;">
+              <div class="progress-fill" style="width:${c.score}%;"></div>
+            </div>
+          </div>
+          <div class="rank-meta" style="margin-top:4px;">
+            Demand ${c.demand} · Growth ${c.growth} · Avg ${c.avg_salary_lpa || '–'} LPA
+          </div>
+        </div>
+        <div class="rank-score">${c.score}%</div>
+      </div>
+    `).join("");
+      } catch (e) {
+        list.innerHTML = `<div style="color:var(--text-3);font-size:0.88rem;">Could not load rankings.</div>`;
+      }
+    }
+
+    async function loadSkillGap() {
+      const gapList = document.getElementById("skillGapList");
+      try {
+        const res = await api(`/skill-gap/${userId}`);
+        document.getElementById("skillGapCareer").textContent = `For: ${res.career || "your career goal"}`;
+        if (!res.missing_skills || !res.missing_skills.length) {
+          gapList.innerHTML = `<div style="color:var(--success);font-size:0.88rem;">🎉 You have all required skills for this role!</div>`;
+          return;
+        }
+        gapList.innerHTML = res.missing_skills.map(s => `
+      <div class="gap-item">
+        <div>
+          <div class="gap-skill-name">${s.skill}</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">Priority ${s.importance || '–'}</div>
+        </div>
+        <div class="importance-bar">
+          <div class="importance-fill" style="width:${Math.min((s.importance || 1) * 25, 100)}%;"></div>
+        </div>
+      </div>
+    `).join("");
+      } catch (e) {
+        gapList.innerHTML = `<div style="color:var(--text-3);font-size:0.88rem;">Could not run gap analysis.</div>`;
       }
     }
 
     async function performWebSearch() {
-      const q = document.getElementById('webSearchInput').value;
-      const resultDiv = document.getElementById('webSearchResult');
+      const q = document.getElementById("webSearchInput").value.trim();
       if (!q) return;
-
-      resultDiv.innerHTML = "Searching the web...";
-      const res = await api(`/web-search?query=${encodeURIComponent(q)}`);
-
-      if (res.error) {
-        resultDiv.innerHTML = "Search failed.";
-      } else {
+      const resultDiv = document.getElementById("webResultInline");
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = "Searching...";
+      try {
+        const res = await api(`/web-search?query=${encodeURIComponent(q)}`);
+        if (res.error) { resultDiv.innerHTML = "Search failed."; return; }
         resultDiv.innerHTML = `
-          <strong>${res.title}</strong><br>
-          ${res.description}<br><br>
-          💰 Salary: ${res.avg_salary}<br>
-          🛠 Skills: ${res.skills_required.join(", ")}
-        `;
+      <strong>${res.title}</strong><br>
+      ${res.description}<br><br>
+      💰 Salary: ${res.avg_salary}<br>
+      🛠️ Skills: ${(res.skills_required || []).join(", ")}
+    `;
+      } catch (e) { resultDiv.innerHTML = "Could not reach server."; }
+    }
+
+    // ─── Skill Progress ──────────────────────────────────────────
+    const PROF_LABELS = ["", "Beginner", "Elementary", "Intermediate", "Advanced", "Expert"];
+    const PROF_COLORS = ["", "#64748b", "#06b6d4", "#6366f1", "#8b5cf6", "#f59e0b"];
+
+    async function loadSkillProgress() {
+      const list = document.getElementById("skillProgressList");
+      list.innerHTML = `<div class="skel-card skeleton" style="height:60px;border-radius:12px;"></div>`.repeat(3);
+      try {
+        const res = await api(`/skill-progress/${userId}`);
+        if (!res.skill_progress || !res.skill_progress.length) {
+          list.innerHTML = `
+        <div style="text-align:center;padding:40px 20px;color:var(--text-3);">
+          <div style="font-size:2rem;margin-bottom:10px;">🛠️</div>
+          <div>No skill progress tracked yet. Add a skill above!</div>
+        </div>`;
+          return;
+        }
+        list.innerHTML = res.skill_progress.map(sp => `
+      <div class="sp-card">
+        <div class="sp-icon">🔷</div>
+        <div class="sp-info">
+          <div class="sp-name">${sp.skill}</div>
+          <div class="sp-label" style="color:${PROF_COLORS[sp.proficiency_level]};">
+            ${sp.label}
+          </div>
+          <div class="progress-track" style="margin-top:6px;max-width:200px;">
+            <div class="progress-fill" style="width:${sp.proficiency_level * 20}%;background:${PROF_COLORS[sp.proficiency_level]};"></div>
+          </div>
+        </div>
+        <div class="sp-controls">
+          <input type="range" class="sp-slider" min="1" max="5" value="${sp.proficiency_level}"
+            oninput="updateSkillLevel('${sp.skill}', this.value)"
+            title="Adjust proficiency">
+          <span style="font-size:0.75rem;color:var(--text-3);min-width:12px;">${sp.proficiency_level}/5</span>
+        </div>
+      </div>
+    `).join("");
+      } catch (e) {
+        list.innerHTML = `<div style="color:var(--text-3);">Could not load skill progress.</div>`;
       }
     }
 
-    // Profile Logic
+    async function addNewSkill() {
+      const name = document.getElementById("newSkillInput").value.trim();
+      const level = parseInt(document.getElementById("newSkillLevel").value);
+      if (!name) return;
+      document.getElementById("newSkillInput").value = "";
+      try {
+        await api(`/skill-progress/${userId}`, "POST", { skill_name: name, proficiency_level: level });
+        showToast(`"${name}" added at ${PROF_LABELS[level]} level`, "success");
+        loadSkillProgress();
+      } catch (e) {
+        showToast("Failed to add skill. Check server.", "error");
+      }
+    }
+
+    async function updateSkillLevel(skillName, level) {
+      try {
+        await api(`/skill-progress/${userId}`, "POST", {
+          skill_name: skillName,
+          proficiency_level: parseInt(level)
+        });
+        showToast(`${skillName} updated to ${PROF_LABELS[level]}`, "info");
+      } catch (e) { }
+    }
+
+    // ─── Profile ─────────────────────────────────────────────────
     async function loadProfile() {
-      const details = document.getElementById('profileDetails');
-      const res = await api(`/profile/${userId}`);
+      const content = document.getElementById("profileContent");
+      try {
+        const p = await api(`/profile/${userId}`);
+        if (!p || p.error) {
+          content.innerHTML = `<div style="color:var(--text-3);">Profile not found. <a href="profile-setup.html" style="color:var(--accent);">Set it up</a>.</div>`;
+          return;
+        }
+        const fields = [
+          ["Education", `${p.education_level || '–'} (${p.class_or_degree || '–'})`],
+          ["Stream", p.stream || '–'],
+          ["Marks", `${p.marks || '–'}%`],
+          ["Category", p.category || '–'],
+          ["Interest", p.interest_area || '–'],
+          ["Location", p.location_preference || '–'],
+          ["Budget", p.budget_lpa ? `${p.budget_lpa} LPA` : '–'],
+          ["Career Goal", p.career_goal || '–'],
+        ];
+        content.innerHTML = `
+      <div class="profile-grid">
+        ${fields.map(([label, value]) => `
+          <div class="profile-field">
+            <div class="field-label">${label}</div>
+            <div class="field-value">${escHtml(String(value))}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
 
-      if (res.error) {
-        details.innerHTML = `<p>${res.error}</p>`;
-        return;
+        // Skills
+        const skillsEl = document.getElementById("profileSkillsList");
+        if (p.skills && p.skills.length) {
+          skillsEl.innerHTML = p.skills.map(s => `
+        <span class="badge badge-accent">${escHtml(s)}</span>
+      `).join("");
+        } else {
+          skillsEl.innerHTML = `<span style="color:var(--text-3);font-size:0.85rem;">No skills added yet.</span>`;
+        }
+      } catch (e) {
+        content.innerHTML = `<div style="color:var(--text-3);">Could not load profile data.</div>`;
       }
-
-      details.innerHTML = `
-                <p><strong>Education:</strong> ${res.education_level} (${res.class_or_degree})</p>
-                <p><strong>Stream:</strong> ${res.stream}</p>
-                <p><strong>Marks:</strong> ${res.marks}%</p>
-                <p><strong>Interest:</strong> ${res.interest_area}</p>
-                <p><strong>Goal:</strong> ${res.career_goal}</p>
-            `;
     }
 
+    // ─── Feedback ────────────────────────────────────────────────
+    function openFeedbackModal() {
+      document.getElementById("feedbackModal").classList.add("open");
+    }
+    function closeFeedbackModal() {
+      document.getElementById("feedbackModal").classList.remove("open");
+      currentFeedbackRating = 0;
+      document.querySelectorAll("#modalStars .star").forEach(s => s.classList.remove("active"));
+      document.getElementById("feedbackComment").value = "";
+    }
+    function setModalRating(n) {
+      currentFeedbackRating = n;
+      document.querySelectorAll("#modalStars .star").forEach((s, i) => s.classList.toggle("active", i < n));
+    }
+    async function submitFeedback() {
+      if (!currentFeedbackRating) { showToast("Please select a rating.", "error"); return; }
+      const comment = document.getElementById("feedbackComment").value;
+      try {
+        const res = await api("/feedback", "POST", {
+          user_id: parseInt(userId),
+          session_id: currentSessionId,
+          rating: currentFeedbackRating,
+          comment
+        });
+        closeFeedbackModal();
+        showToast(res.message || "Thank you for your feedback!", "success");
+      } catch (e) {
+        showToast("Failed to submit feedback.", "error");
+      }
+    }
+
+    // ─── Logout ──────────────────────────────────────────────────
     function handleLogout() {
       localStorage.clear();
       window.location.href = "login.html";
     }
 
-    // Handle Enter key
-    document.getElementById('userInput').addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendMessage();
-    });
+    // ─── Toast ───────────────────────────────────────────────────
+    function showToast(msg, type = "info") {
+      document.querySelectorAll(".toast").forEach(t => t.remove());
+      const t = document.createElement("div");
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity = "0"; t.style.transition = "opacity 0.3s"; setTimeout(() => t.remove(), 300); }, 2800);
+    }
   </script>
 </body>
 

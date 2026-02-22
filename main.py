@@ -432,8 +432,21 @@ async def ai_guidance(user_id: int):
             return {"error": "Profile not found"}
 
         student_skills = get_student_skill_names(db, user_id)
-        student_context = build_rag_context(profile, student_skills)
+        
+        # --- DYNAMIC DISCOVERY ---
+        target = profile.get("career_goal") or profile.get("interest_area", "Engineering")
+        from scraper.collector import CareerScraper
+        scraper = CareerScraper()
+        discovery_data = scraper.search_career_info(target)
+        
+        if not discovery_data.get("found"):
+            print(f"🌐 Discovered new career: {target}. Persisting to DB.")
+            from queries import insert_scraped_career
+            insert_scraped_career(db, discovery_data)
+        # -------------------------
 
+        student_context = build_rag_context(profile, student_skills)
+        
         # ML career ranking for context
         top_careers = score_careers(
             interest_area=profile.get("interest_area", ""),
@@ -552,32 +565,31 @@ async def chat_with_ai(session_id: int, message: str):
         user_id = get_user_id_by_session(db, session_id)
         if user_id is None:
             return {"error": "Session not found. Please start a new chat."}
-        # 1. Fetch history for context
-        history = get_chat_history(db, session_id, limit=5)
-        
-        # 2. Get user info for grounding
-        user_id = db.execute(text("SELECT user_id FROM chat_sessions WHERE session_id = :s"), {"s": session_id}).fetchone()
-        profile_json = "{}"
-        if user_id:
-            p = get_profile_by_user_id(db, user_id[0])
-            if p:
-                profile_json = json.dumps(p)
 
-        # 3. Intelligent Discovery Trigger:
-        # If the message mentions a career, check if we know it.
-        # This is a simplified keyword check.
+        # --- DYNAMIC DISCOVERY ---
         career_keywords = ["career", "become", "job", "salary", "skills for", "how to be a"]
         if any(k in message.lower() for k in career_keywords):
-            # Try to extract the career name (simplified)
-            # For now, we'll use the whole message as a search query if it's short
             from scraper.collector import CareerScraper
             scraper = CareerScraper()
             discovery = scraper.search_career_info(message)
             if not discovery.get("found") and len(message.split()) < 10:
-                print(f"🌐 Dynamic discovery triggered in chat for query: {message}")
+                print(f"🌐 Dynamic discovery triggered in chat: {message}")
+                from queries import insert_scraped_career
                 insert_scraped_career(db, discovery)
+        # -------------------------
 
-        # 4. RAG Search
+        # 1. Fetch history for context
+        history = get_chat_history(db, session_id, limit=5)
+        
+        # 2. Get user info for grounding
+        user_id_row = db.execute(text("SELECT user_id FROM chat_sessions WHERE session_id = :s"), {"s": session_id}).fetchone()
+        profile_json = "{}"
+        if user_id_row:
+            p = get_profile_by_user_id(db, user_id_row[0])
+            if p:
+                profile_json = json.dumps(p)
+
+        # 3. RAG Search
         docs = cached_rag_search(message, top_k=3)
         context = "\n\n".join(docs)
 

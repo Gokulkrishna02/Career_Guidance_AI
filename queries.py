@@ -292,7 +292,7 @@ def save_chat(db, session_id, role, message):
 # SKILLS / GAP ANALYSIS
 # =====================================================
 
-def get_student_skills(db, user_id):
+def get_student_skills(db: Session, user_id: int):
     query = text("""
         SELECT s.skill_id, s.skill_name
         FROM student_skills ss
@@ -300,6 +300,63 @@ def get_student_skills(db, user_id):
         WHERE ss.user_id = :user_id
     """)
     return db.execute(query, {"user_id": user_id}).fetchall()
+
+
+def insert_scraped_career(db: Session, data: dict):
+    """Inserts a new career and its skills into the database."""
+    try:
+        # Check if career exists
+        existing = db.execute(
+            text("SELECT career_id FROM careers WHERE career_name = :n"),
+            {"n": data["career_name"]}
+        ).fetchone()
+        
+        if existing:
+            return existing[0]
+
+        # Insert career
+        res = db.execute(
+            text("""
+                INSERT INTO careers (career_name, career_description, avg_salary_lpa, demand_score, growth_score)
+                VALUES (:n, :d, :s, :ds, :gs) RETURNING career_id
+            """),
+            {
+                "n": data["career_name"],
+                "d": data["description"],
+                "s": data["avg_salary"],
+                "ds": data.get("demand_score", 70),
+                "gs": data.get("growth_score", 70)
+            }
+        )
+        career_id = res.fetchone()[0]
+
+        # Insert skills and link them
+        for skill in data["skills"]:
+            # Ensure skill exists in global skills table
+            db.execute(
+                text("INSERT INTO skills (skill_name) VALUES (:n) ON CONFLICT (skill_name) DO NOTHING"),
+                {"n": skill["name"]}
+            )
+            sid = db.execute(
+                text("SELECT skill_id FROM skills WHERE skill_name = :n"),
+                {"n": skill["name"]}
+            ).fetchone()[0]
+
+            # Link career to skill
+            db.execute(
+                text("""
+                    INSERT INTO career_skills (career_id, skill_id, importance_level)
+                    VALUES (:cid, :sid, :il) ON CONFLICT DO NOTHING
+                """),
+                {"cid": career_id, "sid": sid, "il": skill["importance"]}
+            )
+        
+        db.commit()
+        return career_id
+    except Exception as e:
+        db.rollback()
+        print(f"Error inserting scraped career: {e}")
+        return None
 
 
 def get_student_skill_names(db, user_id) -> list:

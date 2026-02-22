@@ -552,37 +552,61 @@ async def chat_with_ai(session_id: int, message: str):
         user_id = get_user_id_by_session(db, session_id)
         if user_id is None:
             return {"error": "Session not found. Please start a new chat."}
+        # 1. Fetch history for context
+        history = get_chat_history(db, session_id, limit=5)
+        
+        # 2. Get user info for grounding
+        user_id = db.execute(text("SELECT user_id FROM chat_sessions WHERE session_id = :s"), {"s": session_id}).fetchone()
+        profile_json = "{}"
+        if user_id:
+            p = get_profile_by_user_id(db, user_id[0])
+            if p:
+                profile_json = json.dumps(p)
 
-        profile = get_profile_by_user_id(db, user_id)
-        if not profile:
-            return {"error": "Profile not found. Please complete your profile first."}
+        # 3. Intelligent Discovery Trigger:
+        # If the message mentions a career, check if we know it.
+        # This is a simplified keyword check.
+        career_keywords = ["career", "become", "job", "salary", "skills for", "how to be a"]
+        if any(k in message.lower() for k in career_keywords):
+            # Try to extract the career name (simplified)
+            # For now, we'll use the whole message as a search query if it's short
+            from scraper.collector import CareerScraper
+            scraper = CareerScraper()
+            discovery = scraper.search_career_info(message)
+            if not discovery.get("found") and len(message.split()) < 10:
+                print(f"🌐 Dynamic discovery triggered in chat for query: {message}")
+                insert_scraped_career(db, discovery)
 
-        student_skills = get_student_skill_names(db, user_id)
-        student_context = build_rag_context(profile, student_skills)
+        # 4. RAG Search
+        docs = cached_rag_search(message, top_k=3)
+        context = "\n\n".join(docs)
 
-        retrieved_docs = cached_rag_search(message)
+        chat_messages = [{"role": m["role"], "content": m["message"]} for m in history]
+        
+        # System prompt with profile grounding
+        system_msg = f"""
+You are a helpful Career AI Counselor.
+User Profile: {profile_json}
+Context from Knowledge Base: {context}
 
-        prompt = build_chat_prompt(
-            student_context=student_context,
-            retrieved_docs=retrieved_docs,
-            chat_history=get_recent_chats(db, session_id),
-            user_message=message
-        )
+Answer the user's career questions accurately based on the context and their profile.
+If you don't know the answer, say you are searching for more details.
+"""
+        chat_messages.insert(0, {"role": "system", "content": system_msg})
+        chat_messages.append({"role": "user", "content": message})
 
         response = await run_in_threadpool(
             ollama.chat,
             model="llama3.2:1b",
-            messages=[{"role": "user", "content": prompt}],
-            options={"temperature": 0.3, "num_predict": 512}
+            messages=chat_messages,
         )
-
-        ai_reply = response["message"]["content"]
-
-        save_chat(db, session_id, "user", message)
-        save_chat(db, session_id, "assistant", ai_reply)
+        
+        reply = response["message"]["content"]
+        save_chat_message(db, session_id, "user", message)
+        save_chat_message(db, session_id, "assistant", reply)
         db.commit()
 
-        return {"reply": ai_reply}
+        return {"reply": reply}
     finally:
         db.close()
 

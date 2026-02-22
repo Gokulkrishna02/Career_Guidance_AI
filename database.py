@@ -6,21 +6,42 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("SUPABASE_DB_URL")
+SQLITE_URL = "sqlite:///./career_guidance.db"
 
 _engine = None
 _SessionLocal = None
 
-
 def _connect():
     global _engine, _SessionLocal
     if _engine is None:
-        if not DATABASE_URL:
-            raise ConnectionError(
-                "❌ SUPABASE_DB_URL not found in .env file. "
-                "Please set it to continue using database features."
-            )
-        _engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args={"connect_timeout": 8})
-        _SessionLocal = sessionmaker(bind=_engine)
+        url = DATABASE_URL
+        is_sqlite = False
+        
+        if not url:
+            print("⚠️ SUPABASE_DB_URL not found. Falling back to local SQLite.")
+            url = SQLITE_URL
+            is_sqlite = True
+        
+        try:
+            connect_args = {"connect_timeout": 5} if not is_sqlite else {}
+            # SQLite doesn't support pool_pre_ping in the same way, but it's safe to keep for Postgres
+            _engine = create_engine(url, pool_pre_ping=is_sqlite is False, connect_args=connect_args)
+            
+            # Test connection
+            with _engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            
+            _SessionLocal = sessionmaker(bind=_engine)
+            print(f"✅ Connected to {'Supabase' if not is_sqlite else 'Local SQLite'}")
+        except Exception as e:
+            if not is_sqlite:
+                print(f"❌ Failed to connect to Supabase: {e}. Falling back to SQLite.")
+                _engine = create_engine(SQLITE_URL)
+                _SessionLocal = sessionmaker(bind=_engine)
+                print("✅ Connected to Local SQLite")
+            else:
+                raise e
+                
     return _SessionLocal
 
 

@@ -318,20 +318,41 @@ def insert_scraped_career(db: Session, data: dict):
 
         # Insert career
         print(f"DEBUG: Inserting career '{career_name}'")
-        res = db.execute(
-            text("""
-                INSERT INTO careers (career_name, career_description, avg_salary_lpa, demand_score, growth_score)
-                VALUES (:n, :d, :s, :ds, :gs) RETURNING career_id
-            """),
-            {
-                "n": career_name,
-                "d": data["description"],
-                "s": data["avg_salary"],
-                "ds": data.get("demand_score", 70),
-                "gs": data.get("growth_score", 70)
-            }
-        )
-        career_id = res.fetchone()[0]
+        
+        # Check if engine is SQLite to handle RETURNING compatibility
+        engine_name = db.bind.name if hasattr(db.bind, 'name') else ''
+        
+        if engine_name == 'sqlite':
+            db.execute(
+                text("""
+                    INSERT INTO careers (career_name, career_description, avg_salary_lpa, demand_score, growth_score)
+                    VALUES (:n, :d, :s, :ds, :gs)
+                """),
+                {
+                    "n": career_name,
+                    "d": data["description"],
+                    "s": data["avg_salary"],
+                    "ds": data.get("demand_score", 70),
+                    "gs": data.get("growth_score", 70)
+                }
+            )
+            career_id = db.execute(text("SELECT last_insert_rowid()")).scalar()
+        else:
+            res = db.execute(
+                text("""
+                    INSERT INTO careers (career_name, career_description, avg_salary_lpa, demand_score, growth_score)
+                    VALUES (:n, :d, :s, :ds, :gs) RETURNING career_id
+                """),
+                {
+                    "n": career_name,
+                    "d": data["description"],
+                    "s": data["avg_salary"],
+                    "ds": data.get("demand_score", 70),
+                    "gs": data.get("growth_score", 70)
+                }
+            )
+            career_id = res.fetchone()[0]
+        
         print(f"DEBUG: Inserted career_id: {career_id}")
 
         # Insert skills and link them

@@ -320,7 +320,7 @@ def insert_scraped_career(db: Session, data: dict):
         print(f"DEBUG: Inserting career '{career_name}'")
         
         # Check if engine is SQLite to handle RETURNING compatibility
-        engine_name = db.bind.name if hasattr(db.bind, 'name') else ''
+        engine_name = db.get_bind().name
         
         if engine_name == 'sqlite':
             db.execute(

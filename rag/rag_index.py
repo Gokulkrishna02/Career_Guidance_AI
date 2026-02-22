@@ -7,7 +7,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sentence_transformers import SentenceTransformer
-from rag.rag_builder import build_documents_from_db
+try:
+    from rag.rag_builder import build_documents_from_db
+except ImportError:
+    from rag_builder import build_documents_from_db
 
 RAG_CACHE = {}
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

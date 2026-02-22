@@ -1,5 +1,12 @@
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from sqlalchemy import text
-from database import SessionLocal
+try:
+    from database import SessionLocal
+except Exception:
+    SessionLocal = None
+
 from rag_documents import get_all_documents
 
 def build_documents_from_db():
